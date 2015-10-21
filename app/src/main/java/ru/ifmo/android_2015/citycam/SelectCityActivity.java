@@ -16,14 +16,11 @@ import ru.ifmo.android_2015.citycam.model.City;
 public class SelectCityActivity extends AppCompatActivity
         implements CitySelectedListener {
 
-    // Прокручивающийся список городов
-    private RecyclerView recyclerView;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_city);
-        recyclerView = (RecyclerView) findViewById(R.id.list);
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.addItemDecoration(new RecylcerDividersDecorator(Color.DKGRAY));
         CitiesRecyclerAdapter adapter = new CitiesRecyclerAdapter(this);
