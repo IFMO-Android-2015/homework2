@@ -14,13 +14,16 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 
+import ru.ifmo.android_2015.citycam.download.DownloadFile;
 import ru.ifmo.android_2015.citycam.download.ProgressCallback;
 import ru.ifmo.android_2015.citycam.file.CreateFile;
 import ru.ifmo.android_2015.citycam.model.City;
+import ru.ifmo.android_2015.citycam.reader.Data;
 import ru.ifmo.android_2015.citycam.reader.Reader;
+import ru.ifmo.android_2015.citycam.save.Container;
+import ru.ifmo.android_2015.citycam.save.SaveFragment;
 import ru.ifmo.android_2015.citycam.webcams.Webcams;
 
 import static android.graphics.BitmapFactory.decodeFile;
@@ -36,14 +39,17 @@ public class CityCamActivity extends AppCompatActivity {
      */
     public static final String EXTRA_CITY = "city";
 
+    private SaveFragment saveFragment;
+    private Container container;
     private ProgressBar progressBarView;
     private ImageView camImageView;
     private Button left, right;
-    private TextView cam;
+    private TextView cam, user, cam_id;
     private DownloadFileTask downloadTask;
     private City city;
-    private int current_cam;
-    private long all_cam;
+    private int current_cam, per_page, page, all_cam;
+    private Data[] data;
+    private boolean change_orientation;
 
 
     @Override
@@ -54,10 +60,11 @@ public class CityCamActivity extends AppCompatActivity {
         progressBarView = (ProgressBar) findViewById(R.id.progress_bar);
         camImageView = (ImageView) findViewById(R.id.cam_image);
         cam = (TextView) findViewById(R.id.cam);
+        user = (TextView) findViewById(R.id.user);
+        cam_id = (TextView) findViewById(R.id.cam_id);
         left = (Button) findViewById(R.id.left_button);
         right = (Button) findViewById(R.id.right_button);
 
-        current_cam = 1;
         city = getIntent().getParcelableExtra(EXTRA_CITY);
         if (city == null) {
             Log.w(TAG, "City object not provided in extra parameter: " + EXTRA_CITY);
@@ -68,34 +75,76 @@ public class CityCamActivity extends AppCompatActivity {
         left.setVisibility(View.INVISIBLE);
         right.setVisibility(View.INVISIBLE);
         cam.setVisibility(View.INVISIBLE);
-        progressBarView.setVisibility(View.VISIBLE);
         progressBarView.setMax(100);
 
-        if (savedInstanceState != null) {
-            // Пытаемся получить ранее запущенный таск
-            downloadTask = (DownloadFileTask) getLastNonConfigurationInstance();
+        /**
+         * Востанавливаем состояние после поворота экрана.
+         */
+        saveFragment = (SaveFragment) getFragmentManager().findFragmentByTag("SAVE_FRAGMENT");
+        if (saveFragment != null) {
+            container = saveFragment.getModel();
+            downloadTask = container.downloadTask;
+            data = container.data;
+            current_cam = container.current_cam;
+            per_page = container.per_page;
+            page = container.page;
+            all_cam = container.all_cam;
+            change_orientation = true; // устанавливаем флаг, что экран был перевернут
+                                        // и не требует повторной загрузки
+        } else {
+            saveFragment = new SaveFragment();
+            getFragmentManager().beginTransaction().add(saveFragment, "SAVE_FRAGMENT")
+                    .commit();
+            current_cam = 1;
+            per_page = 10;
+            page = 1;
+            data = null;
+            change_orientation = false;
         }
-        if (downloadTask == null) {
+
+        downloadJson();
+        download();
+    }
+
+    public void downloadJson() {
+        if (data == null)
             try {
-                URL url = Webcams.createNearbyUrl(city.latitude, city.longitude);
-                // Создаем новый таск, только если не было ранее запущенного таска
-                downloadTask = new DownloadFileTask(this, url);
-                downloadTask.execute();
-            } catch (MalformedURLException e) {
+                URL url = Webcams.createNearbyUrl(city.latitude, city.longitude,
+                        (current_cam / per_page) + 1);
+                DownloadJsonTask djt = new DownloadJsonTask(url);
+                djt.execute();
+            } catch (IOException e) {
                 e.printStackTrace();
             }
+    }
+
+    public void download() {
+        progressBarView.setProgress(0);
+        progressBarView.setVisibility(View.VISIBLE);
+        if (downloadTask == null) {
+            // Создаем новый таск, только если не было ранее запущенного таска
+            downloadTask = new DownloadFileTask(this);
+            downloadTask.execute();
         } else {
             // Передаем в ранее запущенный таск текущий объект Activity
             downloadTask.attachActivity(this);
         }
     }
 
+    /**
+     * Обрабатываем нажатие кнопок для перехода между камерами.
+     */
     public void rightClick(View view) {
         if (current_cam < all_cam) {
             current_cam++;
             left.setVisibility(View.INVISIBLE);
             right.setVisibility(View.INVISIBLE);
             cam.setVisibility(View.INVISIBLE);
+            if (((current_cam - 1) / per_page) + 1 > page) {
+                data = null;
+                downloadJson();
+            }
+            download();
         }
     }
 
@@ -105,6 +154,46 @@ public class CityCamActivity extends AppCompatActivity {
             left.setVisibility(View.INVISIBLE);
             right.setVisibility(View.INVISIBLE);
             cam.setVisibility(View.INVISIBLE);
+            download();
+        }
+    }
+
+    /**
+     * Сохраняем состояние экрана при разрушении активити.
+     */
+    @Override
+    protected void onPause() {
+        container = new Container(downloadTask, data, current_cam, page, per_page, all_cam);
+        saveFragment.setModel(container);
+        super.onPause();
+    }
+
+    public class DownloadJsonTask extends AsyncTask<Void, Void, Integer> {
+
+        private URL url;
+
+        public DownloadJsonTask(URL url) {
+            this.url = url;
+        }
+
+        @Override
+        protected Integer doInBackground(Void... params) {
+            try {
+                data = Reader.downloadJson(url, current_cam);
+                return 1;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return 0;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Integer resultCode) {
+            // Этот метод выполняется в UI потоке
+            // Параметр resultCode -- это результат doInBackground
+            per_page = Reader.per_page;
+            all_cam = Reader.count;
+            page = Reader.page;
         }
     }
 
@@ -114,12 +203,10 @@ public class CityCamActivity extends AppCompatActivity {
         private Context context;
         private CityCamActivity activity;
         private File destFile;
-        private URL url;
 
         private int progress;
 
-        public DownloadFileTask(CityCamActivity activity, URL url) {
-            this.url = url;
+        public DownloadFileTask(CityCamActivity activity) {
             this.context = activity.getApplicationContext();
             this.activity = activity;
         }
@@ -137,12 +224,12 @@ public class CityCamActivity extends AppCompatActivity {
 
         @Override
         protected Long doInBackground(Void... params) {
-            long count = 0;
+            long size = 0;
             try {
-                return downloadFile(url, context, this);
+                return downloadFile(context, this);
             } catch (IOException e) {
                 e.printStackTrace();
-                return count;
+                return size;
             }
         }
 
@@ -156,7 +243,6 @@ public class CityCamActivity extends AppCompatActivity {
             publishProgress(progress);
         }
 
-        @Override
         public void onPostExecute(Long resultCode) {
             // Этот метод выполняется в UI потоке
             // Параметр resultCode -- это результат doInBackground
@@ -164,19 +250,28 @@ public class CityCamActivity extends AppCompatActivity {
             activity.left.setVisibility(View.VISIBLE);
             activity.right.setVisibility(View.VISIBLE);
             activity.cam.setVisibility(View.VISIBLE);
-            all_cam = resultCode;
-            if (resultCode == 0)
+            if (all_cam == 0)
                 activity.cam.setText("Camera not found");
-            else
-                activity.cam.setText(current_cam + " of " + resultCode);
-            Bitmap bit = decodeFile(destFile.getPath());
-            activity.camImageView.setImageBitmap(bit);
+            else {
+                activity.cam.setText(current_cam + " of " + all_cam);
+                activity.user.setText("user : " + data[current_cam - 1].user);
+                activity.cam_id.setText("id : " + data[current_cam - 1].id);
+                Bitmap bit = decodeFile(destFile.getPath());
+                activity.camImageView.setImageBitmap(bit);
+            }
+            downloadTask = null;
         }
 
-        private Long downloadFile(URL url, Context context,
+        private Long downloadFile(Context context,
                                   ProgressCallback progressCallback) throws IOException {
-            destFile = CreateFile.createTempExternalFile(context, city.name, current_cam, ".jpg");
-            return Reader.downloadJson(url, destFile, current_cam, progressCallback);
+            destFile = CreateFile.createTempExternalFile(context, ".jpg");
+            if (!change_orientation) {
+                if (data != null)
+                    return DownloadFile.downloadFile(data[current_cam - 1].url,
+                            destFile, progressCallback);
+            } else
+                change_orientation = false;
+            return (long) 0;
         }
     }
 

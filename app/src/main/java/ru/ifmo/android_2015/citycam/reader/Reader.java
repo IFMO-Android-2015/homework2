@@ -3,7 +3,6 @@ package ru.ifmo.android_2015.citycam.reader;
 import android.util.JsonReader;
 import android.util.Log;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,14 +10,15 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import ru.ifmo.android_2015.citycam.download.DownloadFile;
-import ru.ifmo.android_2015.citycam.download.ProgressCallback;
-
 public class Reader {
 
     private static Data[] data = null;
+    public static int count, per_page, page;
 
-    public static long downloadJson(URL jsonUrl, File destFile, int cam_number, ProgressCallback progressCallback) throws IOException {
+    /**
+     * Загружаем Json файл.
+     */
+    public static Data[] downloadJson(URL jsonUrl, int cam_number) throws IOException {
         HttpURLConnection conn = (HttpURLConnection) jsonUrl.openConnection();
         InputStream in = null;
 
@@ -32,10 +32,9 @@ public class Reader {
             }
 
             in = conn.getInputStream();
-            int count = readJsonStream(in);
-            if (data != null && cam_number <= count)
-                DownloadFile.downloadFile(data[cam_number - 1].url, destFile, progressCallback);
-            return count;
+            // Передаем поток для чтения
+            count = readJsonStream(in);
+            return data;
         } finally {
             // Закрываем все потоки и соедиениние
             if (in != null) {
@@ -57,7 +56,9 @@ public class Reader {
             reader.close();
         }
     }
-
+    /**
+     * Узнаем общее состояние камер.
+     */
     private static int readMessages(JsonReader reader) throws IOException {
         reader.beginObject();
         reader.hasNext();
@@ -74,9 +75,11 @@ public class Reader {
             }
         return 0;
     }
-
+    /**
+     * Узнаем количество камер, номер страницы и количество камер на странице.
+     */
     private static int readCount(JsonReader reader) throws IOException {
-        int count = 0, page_count = 10;
+        int count = 0;
         String name;
 
         reader.beginObject();
@@ -87,7 +90,9 @@ public class Reader {
             if (name.equals("count"))
                 count = Integer.parseInt(reader.nextString());
             else if (name.equals("per_page"))
-                page_count = reader.nextInt();
+                per_page = reader.nextInt();
+            else if (name.equals("page"))
+                page = reader.nextInt();
             else if (!name.equals("webcam"))
                 reader.skipValue();
             else
@@ -99,14 +104,17 @@ public class Reader {
                 data = null;
             return 0;
         }
-        data = new Data[count];
-        if (count > page_count)
-            readData(reader, page_count);
+        if (data == null || data.length != count)
+            data = new Data[count];
+        if (count - (page - 1) * per_page > per_page)
+            readData(reader, per_page);
         else
-            readData(reader, count);
+            readData(reader, count - (page - 1) * per_page);
         return count;
     }
-
+    /**
+     * Читаем данные по каждой камере и сохраняем в массив data.
+     */
     public static void readData (JsonReader reader, int count) throws IOException {
         String user = "", name;
         URL url = null;
@@ -134,7 +142,8 @@ public class Reader {
                 //Log.d(TAG, "name: " + name);
             }
             reader.endObject();
-            data[i] = new Data(url, id, user);
+            data[i + per_page * (page - 1)] = new Data(url, id, user);
+            Log.d(TAG, "i + per_page * (page - 1) : " + (i + per_page * (page - 1)));
         }
     }
 

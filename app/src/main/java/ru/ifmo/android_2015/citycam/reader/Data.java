@@ -1,7 +1,9 @@
 package ru.ifmo.android_2015.citycam.reader;
 
 import java.net.URL;
-
+/**
+ * Контейнер для хранения данных камер.
+ */
 public class Data {
 
     public URL url;
