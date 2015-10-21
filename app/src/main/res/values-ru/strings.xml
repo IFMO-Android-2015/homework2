@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Камеры городов</string>
+    <string name="fetching_data">Получение данных… </string>
+    <string name="network_error">Ошибка сети :-(</string>
+    <string name="no_cameras">Нет камер в этом городе</string>
+    <string name="last_update">Последнее обновление:</string>
+</resources>
