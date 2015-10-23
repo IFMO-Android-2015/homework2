@@ -3,6 +3,8 @@ package ru.ifmo.android_2015.citycam;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -38,6 +40,11 @@ public class CityCamActivity extends AppCompatActivity {
      */
     public static final String EXTRA_CITY = "city";
 
+    private static final String TITLE_VIEW = "cam_name";
+    private static final String TIME_VIEW = "cam_time";
+    private static final String BITMAP_VIEW = "cam_image";
+    private static final String LOCATION_VIEW = "cam_location";
+
     private static City city;
     private DownloadFileTask downloadTask;
     private static ImageView camImageView;
@@ -65,7 +72,6 @@ public class CityCamActivity extends AppCompatActivity {
 
         getSupportActionBar().setTitle(city.name);
 
-        progressView.setMax(100);
         progressView.setVisibility(View.VISIBLE);
 
 
@@ -85,6 +91,34 @@ public class CityCamActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle savingState) {
+        savingState.putString(TITLE_VIEW, cameraName.getText().toString());
+        savingState.putString(TIME_VIEW, cameraTime.getText().toString());
+        savingState.putString(LOCATION_VIEW, cameraLocation.getText().toString());
+        Drawable temp = camImageView.getDrawable();
+        if (temp != null) {
+            savingState.putParcelable(BITMAP_VIEW, ((BitmapDrawable) temp).getBitmap());
+        }
+        super.onSaveInstanceState(savingState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            cameraName.setText(savedInstanceState.getString(TITLE_VIEW));
+            cameraLocation.setText(savedInstanceState.getString(LOCATION_VIEW));
+            cameraTime.setText(savedInstanceState.getString(TIME_VIEW));
+            if (downloadTask.state != DownloadState.LOADING)
+                progressView.setVisibility(View.GONE);
+            if (downloadTask.state == DownloadState.DONE) {
+                Bitmap b = (savedInstanceState.getParcelable(BITMAP_VIEW));
+                camImageView.setImageBitmap(b);
+            }
+        }
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
     @SuppressWarnings("deprecation")
     public Object onRetainCustomNonConfigurationInstance() {
         // Этот метод вызывается при смене конфигурации, когда текущий объект
@@ -93,11 +127,8 @@ public class CityCamActivity extends AppCompatActivity {
         return downloadTask;
     }
 
-    /**
-     * Состояние загрузки в DownloadFileTask
-     */
     enum DownloadState {
-        DOWNLOADING(R.string.downloading),
+        LOADING(R.string.downloading),
         DONE(R.string.done),
         ERROR(R.string.error);
 
@@ -109,9 +140,6 @@ public class CityCamActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Таск, выполняющий скачивание файла в фоновом потоке.
-     */
     static class DownloadFileTask extends AsyncTask<Void, Integer, DownloadState>
             implements ProgressCallback {
 
@@ -122,7 +150,7 @@ public class CityCamActivity extends AppCompatActivity {
         private CityCamActivity activity;
         private Webcam selected;
         // Текущее состояние загрузки
-        private DownloadState state = DownloadState.DOWNLOADING;
+        private DownloadState state = DownloadState.LOADING;
         // Прогресс загрузки от 0 до 100
         private int progress;
 
@@ -148,9 +176,10 @@ public class CityCamActivity extends AppCompatActivity {
          */
         void updateView() {
             if (activity != null) {
-                activity.progressView.setProgress(progress);
-                if (progress == 100)
-                    progressView.setVisibility(View.GONE);
+                progressView.setProgress(progress);
+            }
+            if (state == DownloadState.DONE || state == DownloadState.ERROR) {
+                progressView.setVisibility(View.GONE);
             }
         }
 
@@ -200,7 +229,7 @@ public class CityCamActivity extends AppCompatActivity {
                 state = DownloadState.ERROR;
             }
             try {
-                image = downloadAndDecode(); //, appContext, this);
+                image = downloadAndDecode();
                 state = DownloadState.DONE;
             } catch (NullPointerException e) {
                 Log.e(TAG, "No camera found: " + e.getMessage());
@@ -229,10 +258,8 @@ public class CityCamActivity extends AppCompatActivity {
             // от результата
             this.state = state;
             if (state == DownloadState.DONE) {
-                progress = 100;
                 setCameraData();
             }
-            progressView.setVisibility(View.GONE);
             if (state == DownloadState.ERROR || selected == null) {
                 Toast.makeText(appContext, "Failed to load image from selected city", Toast.LENGTH_SHORT).show();
             }
@@ -271,7 +298,7 @@ public class CityCamActivity extends AppCompatActivity {
 
         String dateFormat(Calendar date) {
             return date.get(Calendar.DAY_OF_MONTH) + "."
-                    + date.get(Calendar.MONTH) + "."
+                    + (date.get(Calendar.MONTH) + 1) + "."
                     + date.get(Calendar.YEAR) + "\t"
                     + String.format("%02d", date.get(Calendar.HOUR_OF_DAY)) + ":"
                     + String.format("%02d", date.get(Calendar.MINUTE));
