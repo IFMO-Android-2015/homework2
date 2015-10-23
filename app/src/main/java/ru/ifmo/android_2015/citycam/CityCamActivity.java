@@ -5,12 +5,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Debug;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -18,12 +19,13 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Random;
 
 import ru.ifmo.android_2015.citycam.model.City;
 import ru.ifmo.android_2015.citycam.model.Webcam;
 import ru.ifmo.android_2015.citycam.webcams.Webcams;
-import ru.ifmo.android_2015.citycam.utils.*;
 
 /**
  * Экран, показывающий веб-камеру одного выбранного города.
@@ -38,8 +40,11 @@ public class CityCamActivity extends AppCompatActivity {
 
     private static City city;
     private DownloadFileTask downloadTask;
-    private ImageView camImageView;
-    private ProgressBar progressView;
+    private static ImageView camImageView;
+    private static TextView cameraName;
+    private static TextView cameraLocation;
+    private static TextView cameraTime;
+    private static ProgressBar progressView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +59,9 @@ public class CityCamActivity extends AppCompatActivity {
         setContentView(R.layout.activity_city_cam);
         camImageView = (ImageView) findViewById(R.id.cam_image);
         progressView = (ProgressBar) findViewById(R.id.progress);
+        cameraName = (TextView) findViewById(R.id.cam_name);
+        cameraLocation = (TextView) findViewById(R.id.cam_location);
+        cameraTime = (TextView) findViewById(R.id.cam_time);
 
         getSupportActionBar().setTitle(city.name);
 
@@ -72,10 +80,8 @@ public class CityCamActivity extends AppCompatActivity {
         } else {
             // Передаем в ранее запущенный таск текущий объект Activity
             downloadTask.attachActivity(this);
+            downloadTask.setCameraData();
         }
-
-        // Здесь должен быть код, инициирующий асинхронную загрузку изображения с веб-камеры
-        // в выбранном городе.
 
     }
 
@@ -111,9 +117,10 @@ public class CityCamActivity extends AppCompatActivity {
 
         // Context приложения (Не Activity!) для доступа к файлам
         private Context appContext;
+        private Bitmap image;
         // Текущий объект Activity, храним для обновления отображения
         private CityCamActivity activity;
-
+        private Webcam selected;
         // Текущее состояние загрузки
         private DownloadState state = DownloadState.DOWNLOADING;
         // Прогресс загрузки от 0 до 100
@@ -141,8 +148,9 @@ public class CityCamActivity extends AppCompatActivity {
          */
         void updateView() {
             if (activity != null) {
-                //activity.titleTextView.setText(state.titleResId);
                 activity.progressView.setProgress(progress);
+                if (progress == 100)
+                    progressView.setVisibility(View.GONE);
             }
         }
 
@@ -164,43 +172,48 @@ public class CityCamActivity extends AppCompatActivity {
         protected DownloadState doInBackground(Void... ignore) {
 
             //Debug.waitForDebugger();
+            selected = null;
             try {
                 URL nearbyUrl = Webcams.createNearbyUrl(city.latitude, city.longitude);
                 HttpURLConnection urlConnection = (HttpURLConnection) nearbyUrl.openConnection();
                 try {
                     InputStream in = new BufferedInputStream(urlConnection.getInputStream());
                     List<Webcam> result = JSONHandler.readJsonStream(in);
-                    Webcam sample = result != null ? result.get(0) : null;
+                    Random random = new Random();
+                    if (result != null && result.size() != 0)
+                        selected = result.get(random.nextInt(result.size() - 1));
+                    else {
+                        state = DownloadState.ERROR;
+                        return state;
+                    }
                 } catch (Exception e) {
-                    Log.e("Connection error: ", e.getMessage());
-                } finally
-                {
+                    Log.e(TAG, "Connection error: " + e.getMessage());
+                    state = DownloadState.ERROR;
+                } finally {
                     urlConnection.disconnect();
                 }
-            }
-            catch (MalformedURLException e) {
-                Log.e("Malformed URL: ", e.getMessage());
+            } catch (MalformedURLException e) {
+                Log.e(TAG, "Malformed URL: " + e.getMessage());
+                state = DownloadState.ERROR;
             } catch (IOException e) {
-                Log.e("IO exception: ", e.getMessage());
+                Log.e(TAG, "IO exception: " + e.getMessage());
+                state = DownloadState.ERROR;
             }
             try {
-                //downloadFile(appContext, this /*progressCallback*/);
+                image = downloadAndDecode(); //, appContext, this);
                 state = DownloadState.DONE;
-
-            } catch (Exception e) {
-                Log.e(TAG, "Error downloading file: " + e, e);
+            } catch (NullPointerException e) {
+                Log.e(TAG, "No camera found: " + e.getMessage());
                 state = DownloadState.ERROR;
             }
             return state;
         }
 
-        // Метод ProgressCallback, вызывается в фоновом потоке из downloadFile
         @Override
         public void onProgressChanged(int progress) {
             publishProgress(progress);
         }
 
-        // Метод AsyncTask, вызывается в UI потоке в результате вызова publishProgress
         @Override
         protected void onProgressUpdate(Integer... values) {
             if (values.length > 0) {
@@ -217,23 +230,54 @@ public class CityCamActivity extends AppCompatActivity {
             this.state = state;
             if (state == DownloadState.DONE) {
                 progress = 100;
+                setCameraData();
+            }
+            progressView.setVisibility(View.GONE);
+            if (state == DownloadState.ERROR || selected == null) {
+                Toast.makeText(appContext, "Failed to load image from selected city", Toast.LENGTH_SHORT).show();
             }
             updateView();
         }
 
-        static Bitmap downloadAndDecode(Webcam camera) {
+        Bitmap downloadAndDecode() {
+
             Bitmap result = null;
             try {
-                URL imageUrl = new URL(camera.imageUrl);
+                URL imageUrl = new URL(selected.imageUrl);
                 HttpURLConnection urlConnection = (HttpURLConnection) imageUrl.openConnection();
                 InputStream in = new BufferedInputStream(urlConnection.getInputStream());
                 result = BitmapFactory.decodeStream(in);
-            } catch (Exception e) {
-                Log.e("Decoding exception: ", e.getMessage());
+            }
+            catch (MalformedURLException e) {
+                Log.e(TAG, "Malformed URL: " + e.getMessage());
+                state = DownloadState.ERROR;
+            }
+            catch (IOException e) {
+                Log.e(TAG, "Error while decoding stream: " + e.getMessage());
             }
             return result;
         }
+
+        void setCameraData() {
+            if (image != null) {
+                camImageView.setImageBitmap(image);
+                cameraName.setText(selected.title);
+                cameraLocation.setText(selected.location);
+                Calendar date = Calendar.getInstance();
+                date.setTimeInMillis(selected.unixTime * 1000);
+                cameraTime.setText(dateFormat(date));
+            }
+        }
+
+        String dateFormat(Calendar date) {
+            return date.get(Calendar.DAY_OF_MONTH) + "."
+                    + date.get(Calendar.MONTH) + "."
+                    + date.get(Calendar.YEAR) + "\t"
+                    + String.format("%02d", date.get(Calendar.HOUR_OF_DAY)) + ":"
+                    + String.format("%02d", date.get(Calendar.MINUTE));
+        }
     }
+
 
     private static final String TAG = "CityCam";
 }

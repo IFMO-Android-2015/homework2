@@ -1,4 +1,4 @@
-package ru.ifmo.android_2015.citycam.utils;
+package ru.ifmo.android_2015.citycam;
 
 import android.util.JsonReader;
 import android.util.JsonToken;
@@ -13,10 +13,10 @@ import ru.ifmo.android_2015.citycam.model.Webcam;
 /**
  * Created by heat_wave on 10/23/15.
  */
-public class JSONHandler {
+final class JSONHandler {
 
 
-    public static List readJsonStream(InputStream in) throws IOException {
+    static List readJsonStream(InputStream in) throws IOException {
 
         JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
         reader.beginObject();
@@ -44,7 +44,7 @@ public class JSONHandler {
         }
     }
 
-    public static List<Webcam> readWebcamsArray(JsonReader reader) throws IOException {
+    static List<Webcam> readWebcamsArray(JsonReader reader) throws IOException {
         List<Webcam> webcams = new ArrayList<Webcam>();
         reader.beginArray();
         while (reader.hasNext()) {
@@ -54,7 +54,7 @@ public class JSONHandler {
         return webcams;
     }
 
-    public static Webcam readWebcam(JsonReader reader) throws IOException {
+    static Webcam readWebcam(JsonReader reader) throws IOException {
         long unixTime = -1;
         String title = null;
         String country = null;
