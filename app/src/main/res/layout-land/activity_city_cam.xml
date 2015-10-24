@@ -57,12 +57,12 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:id="@+id/cam"
-        android:layout_marginLeft="65dp"
-        android:layout_marginStart="65dp"
-        android:layout_alignBaseline="@+id/right_button"
-        android:layout_alignBottom="@+id/right_button"
+        android:layout_alignBaseline="@+id/left_button"
+        android:layout_alignBottom="@+id/left_button"
         android:layout_toRightOf="@+id/left_button"
-        android:layout_toEndOf="@+id/left_button" />
+        android:layout_toLeftOf="@+id/right_button"
+        android:layout_toStartOf="@+id/right_button"
+        android:gravity="center" />
 
     <TextView
         android:layout_width="wrap_content"
