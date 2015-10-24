@@ -1,6 +1,8 @@
 package ru.ifmo.android_2015.citycam;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +17,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import ru.ifmo.android_2015.citycam.model.City;
@@ -108,7 +111,7 @@ public class CityCamActivity extends AppCompatActivity {
     }
 
     void downloadFile(Context context) throws IOException {
-        File destFile = FileUtils.createTempExternalFile(context, "json");
+        File destFile = FileUtils.createTempExternalFile(context, ".json");
         DownloadUtils.downloadFile(Webcams.createNearbyUrl(this.city.latitude, this.city.longitude).toString(), destFile);
         InputStreamReader inputStreamReader = null;
         BufferedReader bufferedReader = null;
@@ -129,14 +132,17 @@ public class CityCamActivity extends AppCompatActivity {
                         final boolean isNextNull = jsonReader.peek() == JsonToken.NULL;
                         if(nextName.equals("webcam") && !isNextNull) {
                             jsonReader.beginArray();
-                            jsonReader.beginObject();
                             while (jsonReader.hasNext()) {
-                                final String webcamName = jsonReader.nextName();
-                                final boolean webcamNameNull = jsonReader.peek() == JsonToken.NULL;
-                                if(webcamName.equals("preview_url") && !webcamNameNull)
-                                    imageUrl = jsonReader.nextString();
-                                else
-                                    jsonReader.skipValue();
+                                jsonReader.beginObject();
+                                while (jsonReader.hasNext()) {
+                                    final String webcamName = jsonReader.nextName();
+                                    final boolean webcamNameNull = jsonReader.peek() == JsonToken.NULL;
+                                    if (webcamName.equals("preview_url") && !webcamNameNull)
+                                        imageUrl = jsonReader.nextString();
+                                    else
+                                        jsonReader.skipValue();
+                                }
+                                jsonReader.endObject();
                             }
                             jsonReader.endArray();
                         } else jsonReader.skipValue();
@@ -147,9 +153,34 @@ public class CityCamActivity extends AppCompatActivity {
             jsonReader.endObject();
         }
         catch (Exception e) {
+            inputStreamReader = null;
+            bufferedReader = null;
+            jsonReader = null;
             e.printStackTrace();
+            Log.e("Parsing", "Cant parse json.");
         }
-        Log.d("IMAGE URLLLLDLL", imageUrl);
+        if(imageUrl != null) {
+            Log.d("IMAGE URL", imageUrl);
+            File previewFile = FileUtils.createTempExternalFile(context, ".jpg");
+            DownloadUtils.downloadFile(imageUrl, previewFile);
+            InputStream bitmapInputStream = null;
+            try {
+                bitmapInputStream = new FileInputStream(previewFile);
+                final Bitmap bitmap = BitmapFactory.decodeStream(bitmapInputStream);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        camImageView.setImageBitmap(bitmap);
+                        progressView.setVisibility(View.INVISIBLE);
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.e("Image Processing", "Cant decode bitmap.");
+            }
+        } else {
+            Log.e("Parsing", "No webcams in this location.");
+        }
     }
 
 
