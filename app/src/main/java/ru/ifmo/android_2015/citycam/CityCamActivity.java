@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -39,7 +40,7 @@ public class CityCamActivity extends AppCompatActivity {
     private ImageView camImageView;
     private ProgressBar progressView;
     private DownloadJsonTask downloadTask;
-
+    private TextView titleTextView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,6 +54,7 @@ public class CityCamActivity extends AppCompatActivity {
         setContentView(R.layout.activity_city_cam);
         camImageView = (ImageView) findViewById(R.id.cam_image);
         progressView = (ProgressBar) findViewById(R.id.progress);
+        titleTextView = (TextView) findViewById(R.id.titleTextView);
 
         getSupportActionBar().setTitle(city.name);
 
@@ -109,6 +111,7 @@ public class CityCamActivity extends AppCompatActivity {
         BufferedReader bufferedReader;
         JsonReader jsonReader;
         String imageUrl = null;
+        String title = null;
         try {
             inputStreamReader = new InputStreamReader(new FileInputStream(destFile));
             bufferedReader = new BufferedReader(inputStreamReader);
@@ -129,9 +132,18 @@ public class CityCamActivity extends AppCompatActivity {
                                 while (jsonReader.hasNext()) {
                                     final String webcamName = jsonReader.nextName();
                                     final boolean webcamNameNull = jsonReader.peek() == JsonToken.NULL;
-                                    if (webcamName.equals("preview_url") && !webcamNameNull)
-                                        imageUrl = jsonReader.nextString();
-                                    else
+                                    boolean skip = true;
+                                    if(!webcamNameNull) {
+                                        if(webcamName.equals("preview_url")) {
+                                            imageUrl = jsonReader.nextString();
+                                            skip = false;
+                                        }
+                                        if(webcamName.equals("title")) {
+                                            title = jsonReader.nextString();
+                                            skip = false;
+                                        }
+                                    }
+                                    if (skip)
                                         jsonReader.skipValue();
                                 }
                                 jsonReader.endObject();
@@ -156,11 +168,13 @@ public class CityCamActivity extends AppCompatActivity {
             try {
                 bitmapInputStream = new FileInputStream(previewFile);
                 final Bitmap bitmap = BitmapFactory.decodeStream(bitmapInputStream);
+                final String finalTitle = title;
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         camImageView.setImageBitmap(bitmap);
                         progressView.setVisibility(View.INVISIBLE);
+                        titleTextView.setText(finalTitle);
                     }
                 });
             } catch (Exception e) {
