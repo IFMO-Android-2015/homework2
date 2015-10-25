@@ -64,8 +64,6 @@ public class CityCamActivity extends AppCompatActivity {
         if (downloadTask == null) {
             downloadTask = new DownloadJsonTask(this);
             downloadTask.execute();
-        } else {
-            downloadTask.attachActivity(this);
         }
     }
     enum DownloadState {
@@ -84,16 +82,10 @@ public class CityCamActivity extends AppCompatActivity {
     private class DownloadJsonTask extends AsyncTask<Void, Integer, DownloadState> {
 
         private Context appContext;
-        private CityCamActivity activity;
         private DownloadState state = DownloadState.DOWNLOADING;
 
         DownloadJsonTask(CityCamActivity activity) {
             this.appContext = activity.getApplicationContext();
-            this.activity = activity;
-        }
-
-        void attachActivity(CityCamActivity activity) {
-            this.activity = activity;
         }
 
         @Override
@@ -113,9 +105,9 @@ public class CityCamActivity extends AppCompatActivity {
     void downloadFile(Context context) throws IOException {
         File destFile = FileUtils.createTempExternalFile(context, ".json");
         DownloadUtils.downloadFile(Webcams.createNearbyUrl(this.city.latitude, this.city.longitude).toString(), destFile);
-        InputStreamReader inputStreamReader = null;
-        BufferedReader bufferedReader = null;
-        JsonReader jsonReader = null;
+        InputStreamReader inputStreamReader;
+        BufferedReader bufferedReader;
+        JsonReader jsonReader;
         String imageUrl = null;
         try {
             inputStreamReader = new InputStreamReader(new FileInputStream(destFile));
@@ -153,9 +145,6 @@ public class CityCamActivity extends AppCompatActivity {
             jsonReader.endObject();
         }
         catch (Exception e) {
-            inputStreamReader = null;
-            bufferedReader = null;
-            jsonReader = null;
             e.printStackTrace();
             Log.e("Parsing", "Cant parse json.");
         }
@@ -163,7 +152,7 @@ public class CityCamActivity extends AppCompatActivity {
             Log.d("IMAGE URL", imageUrl);
             File previewFile = FileUtils.createTempExternalFile(context, ".jpg");
             DownloadUtils.downloadFile(imageUrl, previewFile);
-            InputStream bitmapInputStream = null;
+            InputStream bitmapInputStream;
             try {
                 bitmapInputStream = new FileInputStream(previewFile);
                 final Bitmap bitmap = BitmapFactory.decodeStream(bitmapInputStream);
