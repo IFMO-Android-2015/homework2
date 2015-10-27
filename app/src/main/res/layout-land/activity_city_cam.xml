@@ -8,24 +8,30 @@
     <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="20dp"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/frameLayout">
+        android:id="@+id/frameLayout"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true">
 
         <ImageView
             android:id="@+id/cam_image"
             android:layout_width="320dp"
             android:layout_height="200dp"
             android:scaleType="centerCrop"
-            android:background="#ffffff"/>
+            android:background="#ffffff"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="20dp" />
 
         <ProgressBar
             android:id="@+id/progress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            style="@android:style/Widget.Holo.Light.ProgressBar"/>
+            style="@android:style/Widget.Holo.Light.ProgressBar"
+            android:visibility="visible" />
 
     </FrameLayout>
 
@@ -33,11 +39,12 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/frameLayout"
-        android:layout_alignRight="@+id/frameLayout"
-        android:layout_alignEnd="@+id/frameLayout"
-        android:layout_alignLeft="@+id/frameLayout"
-        android:layout_alignStart="@+id/frameLayout"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_toRightOf="@+id/frameLayout"
+        android:layout_toEndOf="@+id/frameLayout"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="20dp"
         android:layout_marginTop="20dp">
 
         <TextView
