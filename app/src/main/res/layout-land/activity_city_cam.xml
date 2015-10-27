@@ -9,9 +9,9 @@
         android:id="@+id/frameLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="20dp"
-        android:layout_centerHorizontal="true">
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="20dp">
 
         <ImageView
             android:id="@+id/cam_image"
@@ -29,9 +29,10 @@
     </FrameLayout>
 
     <LinearLayout
+        android:layout_centerVertical="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/frameLayout"
+        android:layout_toRightOf= "@id/frameLayout"
         android:orientation="vertical"
         android:paddingLeft="16dp"
         android:paddingTop="16dp"
