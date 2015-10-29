@@ -10,6 +10,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_margin="20dp"
         android:layout_marginTop="20dp"
         android:layout_centerHorizontal="true">
 
@@ -31,12 +33,12 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="20dp"
         android:layout_marginLeft="15dp"
         android:layout_marginRight="15dp"
         android:id="@+id/cam_name"
-        android:gravity="center"
-        android:layout_below="@id/cam_frame"/>
+        android:layout_toRightOf="@id/cam_frame"
+        />
 
     <TextView
         android:layout_width="match_parent"
@@ -45,7 +47,7 @@
         android:layout_marginLeft="15dp"
         android:layout_marginRight="15dp"
         android:id="@+id/cam_location"
-        android:gravity="center"
+        android:layout_toRightOf="@id/cam_frame"
         android:layout_below="@id/cam_name"/>
 
     <TextView
@@ -54,8 +56,8 @@
         android:layout_marginTop="10dp"
         android:layout_marginLeft="15dp"
         android:layout_marginRight="15dp"
-        android:gravity="center"
         android:id="@+id/cam_time"
+        android:layout_toRightOf="@id/cam_frame"
         android:layout_below="@id/cam_location"/>
 
 </RelativeLayout>
