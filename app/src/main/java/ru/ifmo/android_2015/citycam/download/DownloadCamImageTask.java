@@ -66,7 +66,11 @@ public class DownloadCamImageTask extends AsyncTask<City, Void, Webcam> {
             if (webcam != null) {
                 progress = Progress.GettingImage;
                 webcam.setImage(getBitmap(webcam));
-                progress = Progress.Done;
+                if (webcam.getImage() == null) {
+                    progress = Progress.Error;
+                } else {
+                    progress = Progress.Done;
+                }
             } else {
                 progress = Progress.Error;
             }
@@ -127,11 +131,10 @@ public class DownloadCamImageTask extends AsyncTask<City, Void, Webcam> {
     private List readJsonStream(InputStream is) throws IOException {
         JsonReader reader = new JsonReader(new InputStreamReader(is));
 
-        try {
-            return readWebcams(reader);
-        } finally {
-            reader.close();
-        }
+        List res = readWebcams(reader);
+        reader.close();
+
+        return res;
     }
 
     private List readWebcams(JsonReader reader) throws IOException {
