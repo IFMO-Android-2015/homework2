@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">City Cam</string>
+    <string name="webcam_name">Название:</string>
+    <string name="webcam_views">Просмотров:</string>
+    <string name="webcam_city">Город:</string>
+    <string name="webcam_rating">Рейтинг:</string>
+</resources>
