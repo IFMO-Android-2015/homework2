@@ -115,10 +115,11 @@ public class GetWebcamPreviewAsyncTask extends AsyncTask<City, WebCam, Bitmap> {
     }
 
     private WebCam fetchCam(City city) {
+        HttpURLConnection conn = null;
         InputStream in = null;
         try {
             URL request = Webcams.createNearbyUrl(city.latitude, city.longitude);
-            HttpURLConnection conn = (HttpURLConnection) request.openConnection();
+            conn = (HttpURLConnection) request.openConnection();
             in = conn.getInputStream();
             if (conn.getResponseCode() != 200) {
                 throw new IOException("Not-OK response from server: " + conn.getResponseMessage());
@@ -178,21 +179,23 @@ public class GetWebcamPreviewAsyncTask extends AsyncTask<City, WebCam, Bitmap> {
                     Log.e(LOGTAG, e.getMessage());
                 }
             }
+            if (conn != null) {
+                conn.disconnect();
+            }
         }
     }
 
     private Bitmap fetchBitMap(URL url) {
         if (url == null) return null;
+        HttpURLConnection conn = null;
         InputStream in = null;
         try {
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             if (conn.getResponseCode() != 200) {
                 throw new IOException("Not-OK response from server: " + conn.getResponseMessage());
             }
             in = conn.getInputStream();
-            Bitmap b = BitmapFactory.decodeStream(in);
-            in.close();
-            return b;
+            return BitmapFactory.decodeStream(in);
         } catch (IOException e) {
             Log.e(LOGTAG, e.getMessage());
             return null;
@@ -203,6 +206,9 @@ public class GetWebcamPreviewAsyncTask extends AsyncTask<City, WebCam, Bitmap> {
                 } catch (IOException e) {
                     Log.e(LOGTAG, e.getMessage());
                 }
+            }
+            if (conn != null) {
+                conn.disconnect();
             }
         }
     }
