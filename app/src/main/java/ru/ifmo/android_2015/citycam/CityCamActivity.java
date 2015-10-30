@@ -181,7 +181,7 @@ public class CityCamActivity extends AppCompatActivity {
         super.onPause();
     }
 
-    public class DownloadJsonTask extends AsyncTask<Void, Void, Integer> {
+    public static class DownloadJsonTask extends AsyncTask<Void, Void, Integer> {
 
         private URL url;
         private CityCamActivity activity;
@@ -198,7 +198,7 @@ public class CityCamActivity extends AppCompatActivity {
         @Override
         protected Integer doInBackground(Void... params) {
             try {
-                data = Reader.downloadJson(url, current_cam);
+                activity.data = Reader.downloadJson(url, activity.current_cam);
                 return 1;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -218,7 +218,7 @@ public class CityCamActivity extends AppCompatActivity {
         }
     }
 
-    public class DownloadFileTask extends AsyncTask<Void, Integer, Bitmap>
+    public static class DownloadFileTask extends AsyncTask<Void, Integer, Bitmap>
             implements ProgressCallback {
 
         private Context context;
@@ -270,12 +270,12 @@ public class CityCamActivity extends AppCompatActivity {
             activity.left.setVisibility(View.VISIBLE);
             activity.right.setVisibility(View.VISIBLE);
             activity.cam.setVisibility(View.VISIBLE);
-            if (all_cam == 0)
+            if (activity.all_cam == 0)
                 activity.cam.setText("Camera not found");
             else {
-                activity.cam.setText(current_cam + " of " + all_cam);
-                activity.user.setText("user : " + data[current_cam - 1].user);
-                activity.cam_id.setText("id : " + data[current_cam - 1].id);
+                activity.cam.setText(activity.current_cam + " of " + activity.all_cam);
+                activity.user.setText("user : " + activity.data[activity.current_cam - 1].user);
+                activity.cam_id.setText("id : " + activity.data[activity.current_cam - 1].id);
                 if (resultBit != null)
                     activity.camImageView.setImageBitmap(resultBit);
             }
@@ -286,12 +286,12 @@ public class CityCamActivity extends AppCompatActivity {
                                     ProgressCallback progressCallback) throws IOException {
             destFile = CreateFile.createTempExternalFile(context, ".jpg");
 
-            if (!change_orientation) {
-                if (data != null)
-                    return DownloadFile.downloadFile(data[current_cam - 1].url,
+            if (!activity.change_orientation) {
+                if (activity.data != null)
+                    return DownloadFile.downloadFile(activity.data[activity.current_cam - 1].url,
                             destFile, progressCallback);
             } else {
-                change_orientation = false;
+                activity.change_orientation = false;
                 return decodeFile(destFile.getPath()); // если экран был перевернут просто
                                                         // декодируем картинку
             }
