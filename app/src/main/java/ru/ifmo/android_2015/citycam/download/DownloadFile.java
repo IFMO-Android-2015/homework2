@@ -1,5 +1,6 @@
 package ru.ifmo.android_2015.citycam.download;
 
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import java.io.File;
@@ -11,9 +12,11 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import static android.graphics.BitmapFactory.decodeFile;
+
 public class DownloadFile {
 
-    public static long downloadFile(URL downloadUrl, File destFile, ProgressCallback progressCallback) throws IOException {
+    public static Bitmap downloadFile(URL downloadUrl, File destFile, ProgressCallback progressCallback) throws IOException {
         HttpURLConnection conn = (HttpURLConnection) downloadUrl.openConnection();
         InputStream in = null;
         OutputStream out = null;
@@ -90,7 +93,7 @@ public class DownloadFile {
             }
             conn.disconnect();
         }
-        return contentLength;
+        return decodeFile(destFile.getPath());
     }
 
     private static final String TAG = "Download";

@@ -46,6 +46,7 @@ public class CityCamActivity extends AppCompatActivity {
     private Button left, right;
     private TextView cam, user, cam_id;
     private DownloadFileTask downloadTask;
+    private DownloadJsonTask downloadJsonTask;
     private City city;
     private int current_cam, per_page, page, all_cam;
     private Data[] data;
@@ -84,13 +85,14 @@ public class CityCamActivity extends AppCompatActivity {
         if (saveFragment != null) {
             container = saveFragment.getModel();
             downloadTask = container.downloadTask;
+            downloadJsonTask = container.downloadJsonTask;
             data = container.data;
             current_cam = container.current_cam;
             per_page = container.per_page;
             page = container.page;
             all_cam = container.all_cam;
             change_orientation = true; // устанавливаем флаг, что экран был перевернут
-                                        // и не требует повторной загрузки
+            // и не требует повторной загрузки
         } else {
             saveFragment = new SaveFragment();
             getFragmentManager().beginTransaction().add(saveFragment, "SAVE_FRAGMENT")
@@ -103,19 +105,29 @@ public class CityCamActivity extends AppCompatActivity {
         }
 
         downloadJson();
-        download();
     }
 
     public void downloadJson() {
-        if (data == null)
-            try {
-                URL url = Webcams.createNearbyUrl(city.latitude, city.longitude,
-                        (current_cam / per_page) + 1);
-                DownloadJsonTask djt = new DownloadJsonTask(url);
-                djt.execute();
-            } catch (IOException e) {
-                e.printStackTrace();
+        if (data == null) {
+            if (downloadJsonTask == null) {
+                // Создаем новый таск, только если не было ранее запущенного таска
+                try {
+                    URL url = Webcams.createNearbyUrl(city.latitude, city.longitude,
+                            (current_cam / per_page) + 1);
+                    // Создаем новый таск, только если не было ранее запущенного таска
+                    downloadJsonTask = new DownloadJsonTask(this, url);
+                    downloadJsonTask.execute();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                // Передаем в ранее запущенный таск текущий объект Activity
+                downloadJsonTask.attachActivity(this);
             }
+        } else {
+            // если данные уже загружены то загружаем картинку
+            download();
+        }
     }
 
     public void download() {
@@ -163,7 +175,8 @@ public class CityCamActivity extends AppCompatActivity {
      */
     @Override
     protected void onPause() {
-        container = new Container(downloadTask, data, current_cam, page, per_page, all_cam);
+        container = new Container(downloadJsonTask, downloadTask, data, current_cam,
+                page, per_page, all_cam);
         saveFragment.setModel(container);
         super.onPause();
     }
@@ -171,9 +184,15 @@ public class CityCamActivity extends AppCompatActivity {
     public class DownloadJsonTask extends AsyncTask<Void, Void, Integer> {
 
         private URL url;
+        private CityCamActivity activity;
 
-        public DownloadJsonTask(URL url) {
+        public DownloadJsonTask(CityCamActivity activity, URL url) {
+            this.activity = activity;
             this.url = url;
+        }
+
+        public void attachActivity(CityCamActivity activity) {
+            this.activity = activity;
         }
 
         @Override
@@ -191,13 +210,15 @@ public class CityCamActivity extends AppCompatActivity {
         protected void onPostExecute(Integer resultCode) {
             // Этот метод выполняется в UI потоке
             // Параметр resultCode -- это результат doInBackground
-            per_page = Reader.per_page;
-            all_cam = Reader.count;
-            page = Reader.page;
+            activity.per_page = Reader.per_page;
+            activity.all_cam = Reader.count;
+            activity.page = Reader.page;
+            activity.downloadJsonTask = null;
+            activity.download(); // загружаем картинку после загрузки Json файла
         }
     }
 
-    public class DownloadFileTask extends AsyncTask<Void, Integer, Long>
+    public class DownloadFileTask extends AsyncTask<Void, Integer, Bitmap>
             implements ProgressCallback {
 
         private Context context;
@@ -223,13 +244,12 @@ public class CityCamActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Long doInBackground(Void... params) {
-            long size = 0;
+        protected Bitmap doInBackground(Void... params) {
             try {
                 return downloadFile(context, this);
             } catch (IOException e) {
                 e.printStackTrace();
-                return size;
+                return null;
             }
         }
 
@@ -243,7 +263,7 @@ public class CityCamActivity extends AppCompatActivity {
             publishProgress(progress);
         }
 
-        public void onPostExecute(Long resultCode) {
+        public void onPostExecute(Bitmap resultBit) {
             // Этот метод выполняется в UI потоке
             // Параметр resultCode -- это результат doInBackground
             activity.progressBarView.setVisibility(View.INVISIBLE);
@@ -256,22 +276,26 @@ public class CityCamActivity extends AppCompatActivity {
                 activity.cam.setText(current_cam + " of " + all_cam);
                 activity.user.setText("user : " + data[current_cam - 1].user);
                 activity.cam_id.setText("id : " + data[current_cam - 1].id);
-                Bitmap bit = decodeFile(destFile.getPath());
-                activity.camImageView.setImageBitmap(bit);
+                if (resultBit != null)
+                    activity.camImageView.setImageBitmap(resultBit);
             }
-            downloadTask = null;
+            activity.downloadTask = null;
         }
 
-        private Long downloadFile(Context context,
-                                  ProgressCallback progressCallback) throws IOException {
+        private Bitmap downloadFile(Context context,
+                                    ProgressCallback progressCallback) throws IOException {
             destFile = CreateFile.createTempExternalFile(context, ".jpg");
+
             if (!change_orientation) {
                 if (data != null)
                     return DownloadFile.downloadFile(data[current_cam - 1].url,
                             destFile, progressCallback);
-            } else
+            } else {
                 change_orientation = false;
-            return (long) 0;
+                return decodeFile(destFile.getPath()); // если экран был перевернут просто
+                                                        // декодируем картинку
+            }
+            return null;
         }
     }
 
