@@ -54,9 +54,11 @@ public class CityCamActivity extends AppCompatActivity {
         @Override
         protected Integer doInBackground(Void... params) {
             Log.d("doInBackground", "started doing");
+            int res;
+            HttpURLConnection connect = null;
             try {
                 URL url = Webcams.createNearbyUrl(activity.city.latitude, activity.city.longitude);
-                HttpURLConnection connect = (HttpURLConnection) url.openConnection();
+                connect = (HttpURLConnection) url.openConnection();
                 String s = (new java.util.Scanner(connect.getInputStream()).useDelimiter("\\A")).next();
                 connect.disconnect();
 
@@ -69,14 +71,21 @@ public class CityCamActivity extends AppCompatActivity {
                 url = new URL(firstCam.getString("preview_url"));
                 connect = (HttpURLConnection) url.openConnection();
                 imageBitmap = BitmapFactory.decodeStream(connect.getInputStream());
-                return 0;
+                connect.disconnect();
+                res = 0;
             } catch(Exception ex) {
                 Log.d("GetCityCam: Exception", ex.getMessage());
-                if(ex instanceof JSONException) {
-                    return 2;
+                if(ex instanceof JSONException && ex.getMessage().contains("out of range")) {
+                    res = 2;
+                } else {
+                    res = 1;
                 }
-                return 1;
+            } finally {
+                if(connect != null) {
+                    connect.disconnect();
+                }
             }
+            return res;
         }
 
         @Override
