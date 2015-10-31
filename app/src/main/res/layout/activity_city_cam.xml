@@ -10,7 +10,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_marginTop="20dp"
-        android:layout_centerHorizontal="true">
+        android:layout_centerHorizontal="true"
+        android:id="@+id/frameLayout">
 
         <ImageView
             android:id="@+id/cam_image"
@@ -25,7 +26,41 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             style="@android:style/Widget.Holo.Light.ProgressBar.Large.Inverse"/>
+
+        <TextView
+            android:layout_width="161dp"
+            android:layout_height="90dp"
+            android:text="Error has occured"
+            android:id="@+id/errorTextView"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textSize="20dp"
+            android:visibility="invisible" />
     </FrameLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cam name:"
+        android:id="@+id/camNameTextView"
+        android:visibility="invisible"
+        android:layout_marginTop="10dp"
+        android:layout_below="@+id/frameLayout"
+        android:textAlignment="center"
+        android:layout_alignStart="@id/frameLayout"
+        android:layout_alignEnd="@id/frameLayout" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Date:"
+        android:id="@+id/dateTextView"
+        android:layout_below="@+id/camNameTextView"
+        android:layout_marginTop="10dp"
+        android:visibility="invisible"
+        android:textAlignment="center"
+        android:layout_alignStart="@id/frameLayout"
+        android:layout_alignEnd="@id/frameLayout" />
 
     <!-- Добавьте сюда еще View с информацией о выбранном городе и показанной веб-камеры -->
 
