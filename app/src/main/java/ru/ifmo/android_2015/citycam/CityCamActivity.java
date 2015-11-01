@@ -15,11 +15,8 @@ import android.widget.TextView;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
 
 import org.json.*;
-import org.w3c.dom.Text;
 
 
 import ru.ifmo.android_2015.citycam.model.City;
@@ -44,15 +41,16 @@ public class CityCamActivity extends AppCompatActivity {
     private TextView dateTextView;
     private TextView errorTextView;
 
-    private static class GetCityCamTask extends AsyncTask<Void, Integer, Integer> {
+    private Bitmap imageBitmap;
+    private String camName;
+    private String date;
+    private Integer downloadResult = -1;
+
+    private static class GetCityCamTask extends AsyncTask<Void, Integer, Void> {
         private CityCamActivity activity;
-        private Bitmap imageBitmap;
-        private String camName;
-        private String date;
-        private Integer result;
 
         @Override
-        protected Integer doInBackground(Void... params) {
+        protected Void doInBackground(Void... params) {
             Log.d("doInBackground", "started doing");
             int res;
             HttpURLConnection connect = null;
@@ -65,54 +63,35 @@ public class CityCamActivity extends AppCompatActivity {
                 Log.d("GetCityCam: Response", s);
                 JSONObject root = new JSONObject(s);
                 JSONObject firstCam = root.getJSONObject("webcams").getJSONArray("webcam").getJSONObject(0);
-                camName = firstCam.getString("title");
+                activity.camName = firstCam.getString("title");
                 SimpleDateFormat dateFromat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
-                date = dateFromat.format(firstCam.getLong("last_update") * 1000);
+                activity.date = dateFromat.format(firstCam.getLong("last_update") * 1000);
                 url = new URL(firstCam.getString("preview_url"));
                 connect = (HttpURLConnection) url.openConnection();
-                imageBitmap = BitmapFactory.decodeStream(connect.getInputStream());
+                Bitmap tmp = BitmapFactory.decodeStream(connect.getInputStream());
+                activity.imageBitmap = tmp;
                 connect.disconnect();
-                res = 0;
+                activity.downloadResult = 0;
             } catch(Exception ex) {
                 Log.d("GetCityCam: Exception", ex.getMessage());
                 if(ex instanceof JSONException && ex.getMessage().contains("out of range")) {
-                    res = 2;
+                    activity.downloadResult = 2;
                 } else {
-                    res = 1;
+                    activity.downloadResult = 1;
                 }
             } finally {
                 if(connect != null) {
                     connect.disconnect();
                 }
+
             }
-            return res;
+            return null;
         }
 
         @Override
-        protected void onPostExecute(Integer result) {
+        protected void onPostExecute(Void result) {
+            activity.setBitmap();
             super.onPostExecute(result);
-            this.result = result;
-            setBitmap();
-        }
-
-        public void setBitmap() {
-            if(result == 0) {
-                if (imageBitmap != null) {
-                    activity.camImageView.setImageBitmap(imageBitmap);
-                    activity.progressView.setVisibility(View.INVISIBLE);
-                    activity.camNameTextView.setText("Camera name:\n" + camName);
-                    activity.camNameTextView.setVisibility(View.VISIBLE);
-                    activity.dateTextView.setText("Date:\n" + date);
-                    activity.dateTextView.setVisibility(View.VISIBLE);
-                }
-            } else if(result == 1) {
-                activity.progressView.setVisibility(View.INVISIBLE);
-                activity.errorTextView.setVisibility(View.VISIBLE);
-            } else if(result == 2) {
-                activity.progressView.setVisibility(View.INVISIBLE);
-                activity.errorTextView.setText("No cameras in this city");
-                activity.errorTextView.setVisibility(View.VISIBLE);
-            }
         }
 
         GetCityCamTask(CityCamActivity activity) {
@@ -147,10 +126,6 @@ public class CityCamActivity extends AppCompatActivity {
 
         progressView.setVisibility(View.VISIBLE);
 
-
-        // Здесь должен быть код, инициирующий асинхронную загрузку изображения с веб-камеры
-        // в выбранном городе.
-
         if(savedInstanceState != null) {
             fetchTask = (GetCityCamTask) getLastCustomNonConfigurationInstance();
         }
@@ -159,13 +134,51 @@ public class CityCamActivity extends AppCompatActivity {
             fetchTask.execute();
         } else {
             fetchTask.attachActivity(this);
-            fetchTask.setBitmap();
         }
     }
 
     @Override
     public Object onRetainCustomNonConfigurationInstance() {
         return fetchTask;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle state) {
+        state.putString("camName", camName);
+        state.putString("date", date);
+        state.putInt("downloadResult", downloadResult);
+        state.putParcelable("imageBitmap", imageBitmap);
+        super.onSaveInstanceState(state);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle state) {
+        camName = state.getString("camName");
+        date = state.getString("date");
+        downloadResult = state.getInt("downloadResult");
+        imageBitmap = state.getParcelable("imageBitmap");
+        setBitmap();
+        super.onRestoreInstanceState(state);
+    }
+
+    private void setBitmap() {
+        if(downloadResult == 0) {
+            if (imageBitmap != null) {
+                camImageView.setImageBitmap(imageBitmap);
+                progressView.setVisibility(View.INVISIBLE);
+                camNameTextView.setText("Camera name:\n" + camName);
+                camNameTextView.setVisibility(View.VISIBLE);
+                dateTextView.setText("Date:\n" + date);
+                dateTextView.setVisibility(View.VISIBLE);
+            }
+        } else if(downloadResult == 1) {
+            progressView.setVisibility(View.INVISIBLE);
+            errorTextView.setVisibility(View.VISIBLE);
+        } else if(downloadResult == 2) {
+            progressView.setVisibility(View.INVISIBLE);
+            errorTextView.setText("No cameras in this city");
+            errorTextView.setVisibility(View.VISIBLE);
+        }
     }
 
     private static final String TAG = "CityCam";
