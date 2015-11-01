@@ -26,6 +26,10 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.sql.Time;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 import ru.ifmo.android_2015.citycam.model.City;
 import ru.ifmo.android_2015.citycam.webcams.WebcamData;
@@ -66,9 +70,9 @@ public class CityCamActivity extends AppCompatActivity {
         setContentView(R.layout.activity_city_cam);
         camImageView = (ImageView) findViewById(R.id.cam_image);
         progressView = (ProgressBar) findViewById(R.id.progress);
-        title = (TextView) findViewById(R.id.titleID);
+        title = (TextView) findViewById(R.id.title);
         user = (TextView) findViewById(R.id.user);
-        time = (TextView) findViewById(R.id.updatedTime);
+        time = (TextView) findViewById(R.id.updated);
 
 
         getSupportActionBar().setTitle(city.name);
@@ -95,6 +99,12 @@ public class CityCamActivity extends AppCompatActivity {
         super.onConfigurationChanged(newConfig);
 
     }
+
+    @Override
+    public Object onRetainCustomNonConfigurationInstance() {
+        return super.onRetainCustomNonConfigurationInstance();
+    }
+
     private static final String TAG = "CityCam";
 
     static class DownloadAndDecodeTask extends AsyncTask<Void, Void, Void> {
@@ -122,8 +132,10 @@ public class CityCamActivity extends AppCompatActivity {
                 camImageView.setImageDrawable(new BitmapDrawable(data.getBitmap()));
                 title.setText(data.getTitle());
                 user.setText(data.getUser());
-                time.setText(Long.toString(data.getTime()));
-
+                Date date = new Date(data.getTime() * 1000L);
+                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss z");
+                sdf.setTimeZone(TimeZone.getTimeZone("GMT+3"));
+                time.setText(sdf.format(date));
             }
 
         }
