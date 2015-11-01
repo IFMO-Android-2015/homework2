@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:scrollbars="none">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <FrameLayout
+            android:id="@+id/frameLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="20dp">
+
+            <ProgressBar
+                android:id="@+id/progress"
+                style="@android:style/Widget.Holo.Light.ProgressBar.Large.Inverse"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/cam_image"
+                android:layout_width="320dp"
+                android:layout_height="200dp"
+                android:layout_gravity="left|center_horizontal"
+                android:background="#999"
+                android:scaleType="centerCrop" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/cam_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/frameLayout"
+            android:layout_centerVertical="true"
+            android:text=""
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <TextView
+            android:id="@+id/cam_last_update"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/cam_title"
+            android:text=""
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    </RelativeLayout>
+</ScrollView>
