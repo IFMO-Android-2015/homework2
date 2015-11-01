@@ -1,32 +1,22 @@
 package ru.ifmo.android_2015.citycam;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.JsonReader;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -45,15 +35,13 @@ public class CityCamActivity extends AppCompatActivity {
      * Обязательный extra параметр - объект City, камеру которого надо показать.
      */
     public static final String EXTRA_CITY = "city";
-
+    private static final String TAG = "CityCam";
     private static City city;
-
     private static ImageView camImageView;
     private static ProgressBar progressView;
     private static TextView title;
     private static TextView user;
     private static TextView time;
-
     private DownloadAndDecodeTask downloadAndDecodeTask;
 
     @Override
@@ -94,6 +82,7 @@ public class CityCamActivity extends AppCompatActivity {
             downloadAndDecodeTask.attachActivity(this);
         }
     }
+
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -105,12 +94,11 @@ public class CityCamActivity extends AppCompatActivity {
         return super.onRetainCustomNonConfigurationInstance();
     }
 
-    private static final String TAG = "CityCam";
-
     static class DownloadAndDecodeTask extends AsyncTask<Void, Void, Void> {
         private static WebcamData data;
         private Context appContext;
         private CityCamActivity activity;
+
         DownloadAndDecodeTask(CityCamActivity activity) {
             data = new WebcamData();
             this.activity = activity;
@@ -127,8 +115,7 @@ public class CityCamActivity extends AppCompatActivity {
             if (data == null) {
                 Toast.makeText(appContext, "К сожалению, в данном городе отсутствуют камеры", Toast.LENGTH_SHORT).show();
                 activity.onBackPressed();
-            }
-            else {
+            } else {
                 camImageView.setImageDrawable(new BitmapDrawable(data.getBitmap()));
                 title.setText(data.getTitle());
                 user.setText(data.getUser());
@@ -145,8 +132,7 @@ public class CityCamActivity extends AppCompatActivity {
             try {
                 URL cityURL = Webcams.createNearbyUrl(city.latitude, city.longitude);
                 data = Parser.parse(cityURL);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 Log.e(TAG, "Error getting city url " + e, e);
                 e.printStackTrace();
             }
@@ -199,15 +185,13 @@ public class CityCamActivity extends AppCompatActivity {
                                     insideArrayName = reader.nextName();
                                 }
                                 break;
-                            }
-                            else {
+                            } else {
                                 reader.skipValue();
                                 curName = reader.nextName();
                             }
                         }
                         break;
-                    }
-                    else {
+                    } else {
                         reader.skipValue();
                         name = reader.nextName();
                     }

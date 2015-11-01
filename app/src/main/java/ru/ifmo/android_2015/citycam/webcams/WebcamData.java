@@ -25,10 +25,6 @@ public class WebcamData {
         this.bitmap = bitmap;
     }
 
-    public void setTime(long time) {
-        this.time = time;
-    }
-
     public String getUser() {
         return user;
     }
@@ -47,6 +43,10 @@ public class WebcamData {
 
     public long getTime() {
         return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
     }
 
 }
