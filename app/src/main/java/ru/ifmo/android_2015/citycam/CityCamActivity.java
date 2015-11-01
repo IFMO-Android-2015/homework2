@@ -14,6 +14,7 @@ import ru.ifmo.android_2015.citycam.model.City;
  * Выбранный город передается в extra параметрах.
  */
 public class CityCamActivity extends AppCompatActivity {
+    //мда
 
     /**
      * Обязательный extra параметр - объект City, камеру которого надо показать.
