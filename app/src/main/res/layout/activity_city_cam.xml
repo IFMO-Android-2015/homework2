@@ -10,14 +10,16 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_marginTop="20dp"
-        android:layout_centerHorizontal="true">
+        android:layout_centerHorizontal="true"
+        android:id="@+id/frameLayout">
 
         <ImageView
             android:id="@+id/cam_image"
             android:layout_width="320dp"
             android:layout_height="200dp"
             android:scaleType="centerCrop"
-            android:background="#999"/>
+            android:background="#999"
+            android:layout_gravity="left|bottom" />
 
         <ProgressBar
             android:id="@+id/progress"
@@ -25,7 +27,65 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             style="@android:style/Widget.Holo.Light.ProgressBar.Large.Inverse"/>
+
     </FrameLayout>
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/title"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/titleID"
+        android:layout_toEndOf="@+id/titleID"
+        android:textSize="14dp" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/author"
+        android:text="Автор"
+        android:layout_below="@+id/title"
+        android:layout_toLeftOf="@+id/title"
+        android:layout_toStartOf="@+id/title"
+        android:textSize="15dp" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/titleID"
+        android:layout_alignTop="@+id/title"
+        android:layout_alignLeft="@+id/frameLayout"
+        android:layout_alignStart="@+id/frameLayout"
+        android:text="Название"
+        android:textSize="15dp" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/user"
+        android:layout_below="@+id/title"
+        android:layout_alignLeft="@+id/title"
+        android:layout_alignStart="@+id/title"
+        android:textSize="14dp" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/updated"
+        android:layout_below="@+id/author"
+        android:layout_toLeftOf="@+id/user"
+        android:layout_toStartOf="@+id/user"
+        android:text="Обновлено"
+        android:textSize="15dp" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/updatedTime"
+        android:layout_below="@+id/author"
+        android:layout_toRightOf="@+id/updated"
+        android:layout_toEndOf="@+id/updated"
+        android:textSize="14dp" />
 
     <!-- Добавьте сюда еще View с информацией о выбранном городе и показанной веб-камеры -->
 
