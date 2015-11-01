@@ -10,8 +10,10 @@ import java.net.URL;
 import java.util.Date;
 
 /**
- * Created by ZeRoGerc on 27.10.15.
+ * Created by ZeRoGerc
+ * ITMO UNIVERSITY
  */
+
 public class Webcam {
     private final String title;
     private final Date lastUpdate;

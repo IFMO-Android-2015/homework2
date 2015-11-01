@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">City Cam</string>
+    <string name="downloading">Загрузка&#8230;</string>
+    <string name="error">Ошибка</string>
+    <string name="done">Готово</string>
+    <string name="fetching_data">Получение данных</string>
+    <string name="last_update">Последнее обновление</string>
+    <string name="load_error">Can\'t load image</string>
+    <string name="no_webcams_error">No webcams in chosen city</string>
 </resources>

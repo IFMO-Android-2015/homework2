@@ -39,7 +39,7 @@
         android:layout_below="@id/frame_layout"
         android:textSize="15sp"
         android:layout_margin="5dp"
-        android:layout_centerHorizontal="true"/>
+        android:layout_centerHorizontal="true" />
 
 
     <TextView
@@ -52,6 +52,5 @@
         android:visibility="invisible"
         android:textSize="15sp"
         android:layout_margin="5dp"
-        android:layout_centerHorizontal="true"
-        />
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>

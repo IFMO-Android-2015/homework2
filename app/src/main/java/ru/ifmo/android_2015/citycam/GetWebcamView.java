@@ -49,7 +49,7 @@ public class GetWebcamView extends AsyncTask<City, Webcam, Webcam> {
             URL webcamsUrl = Webcams.createNearbyUrl(city.latitude, city.longitude);
             con = (HttpURLConnection) webcamsUrl.openConnection();
             input = con.getInputStream();
-            JSONObject parsedJSON = new JSONObject(new BufferedReader(new InputStreamReader(input)).readLine());
+            JSONObject parsedJSON = new JSONObject(new BufferedReader(new InputStreamReader(input)).readLine()); //HERE
             if (!parsedJSON.getString("status").equals("ok")) {
                 throw new Exception("Request Failed");
             }
