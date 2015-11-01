@@ -46,6 +46,9 @@ public class CityCamActivity extends AppCompatActivity {
 
     private static ImageView camImageView;
     private static ProgressBar progressView;
+    private static TextView title;
+    private static TextView user;
+    private static TextView time;
 
     private DownloadAndDecodeTask downloadAndDecodeTask;
 
@@ -63,6 +66,10 @@ public class CityCamActivity extends AppCompatActivity {
         setContentView(R.layout.activity_city_cam);
         camImageView = (ImageView) findViewById(R.id.cam_image);
         progressView = (ProgressBar) findViewById(R.id.progress);
+        title = (TextView) findViewById(R.id.titleID);
+        user = (TextView) findViewById(R.id.user);
+        time = (TextView) findViewById(R.id.updatedTime);
+
 
         getSupportActionBar().setTitle(city.name);
 
@@ -91,11 +98,11 @@ public class CityCamActivity extends AppCompatActivity {
     private static final String TAG = "CityCam";
 
     static class DownloadAndDecodeTask extends AsyncTask<Void, Void, Void> {
-
+        private static WebcamData data;
         private Context appContext;
         private CityCamActivity activity;
-        private static WebcamData data = new WebcamData();
         DownloadAndDecodeTask(CityCamActivity activity) {
+            data = new WebcamData();
             this.activity = activity;
             this.appContext = activity.getApplicationContext();
         }
@@ -107,16 +114,16 @@ public class CityCamActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             progressView.setVisibility(View.INVISIBLE);
-            if (data.getBitmapURL().equals("")) {
+            if (data == null) {
                 Toast.makeText(appContext, "К сожалению, в данном городе отсутствуют камеры", Toast.LENGTH_SHORT).show();
                 activity.onBackPressed();
             }
             else {
-                try {
-                    camImageView.setImageDrawable(new BitmapDrawable(BitmapFactory.decodeStream((new URL(data.getBitmapURL())).openStream())));
-                } catch (IOException e) {
-                    Log.e(TAG, "Error getting bitmap from url " + e, e);
-                }
+                camImageView.setImageDrawable(new BitmapDrawable(data.getBitmap()));
+                title.setText(data.getTitle());
+                user.setText(data.getUser());
+                time.setText(Long.toString(data.getTime()));
+
             }
 
         }
@@ -142,7 +149,6 @@ public class CityCamActivity extends AppCompatActivity {
                 JsonReader reader = new JsonReader(new InputStreamReader(cityURL.openStream(), "UTF-8"));
                 reader.beginObject();
                 String name = reader.nextName();
-                String picURLstr = "";
                 while (reader.hasNext()) {
                     if (name.equals("webcams")) {
                         Log.i("PARSER", "found webcams");
@@ -154,29 +160,29 @@ public class CityCamActivity extends AppCompatActivity {
                                 reader.beginArray();
                                 reader.beginObject();
                                 String insideArrayName = reader.nextName();
+                                label:
                                 while (reader.hasNext()) {
-                                    if (insideArrayName.equals("title")) {
-                                        data.setTitle(reader.nextString());
-
-                                        Log.i("PARSER", "found title = " + data.getTitle());
-                                    }
-                                    if (insideArrayName.equals("user")) {
-                                        data.setUser(reader.nextString());
-
-                                        Log.i("PARSER", "found user = " + data.getUser());
-                                    }
-                                    else if (insideArrayName.equals("preview_url")) {
-                                        data.setBitmapURL(reader.nextString());
-                                        Log.i("PARSER", "found preview_url = " + data.getBitmapURL());
-                                        break;
-                                    }
-                                    else if (insideArrayName.equals("last_update")) {
-                                        data.setTime(Long.parseLong(reader.nextString()));
-
-                                        Log.i("PARSER", "found time = " + data.getTime());
-                                    }
-                                    else {
-                                        reader.skipValue();
+                                    switch (insideArrayName) {
+                                        case "title":
+                                            data.setTitle(reader.nextString());
+                                            Log.i("PARSER", "found title = " + data.getTitle());
+                                            break;
+                                        case "user":
+                                            data.setUser(reader.nextString());
+                                            Log.i("PARSER", "found user = " + data.getUser());
+                                            break;
+                                        case "preview_url":
+                                            URL url = new URL(reader.nextString());
+                                            data.setBitmap(BitmapFactory.decodeStream(url.openStream()));
+                                            Log.i("PARSER", "found preview_url = " + url.toString());
+                                            break label;
+                                        case "last_update":
+                                            data.setTime(Long.parseLong(reader.nextString()));
+                                            Log.i("PARSER", "found time = " + data.getTime());
+                                            break;
+                                        default:
+                                            reader.skipValue();
+                                            break;
                                     }
                                     insideArrayName = reader.nextName();
                                 }

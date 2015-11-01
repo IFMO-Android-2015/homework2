@@ -1,27 +1,32 @@
 package ru.ifmo.android_2015.citycam.webcams;
 
+import android.graphics.Bitmap;
+
 /**
  * Created by baba_beda on 11/1/15.
  */
 public class WebcamData {
-    private String bitmapURL;
+    private Bitmap bitmap;
     private String user;
     private String title;
     private long time;
 
     public WebcamData() {
-        bitmapURL = "";
         user = "";
         title = "";
         time = 0L;
     }
 
-    public String getBitmapURL() {
-        return bitmapURL;
+    public Bitmap getBitmap() {
+        return bitmap;
     }
 
-    public void setBitmapURL(String bitmapURL) {
-        this.bitmapURL = bitmapURL;
+    public void setBitmap(Bitmap bitmap) {
+        this.bitmap = bitmap;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
     }
 
     public String getUser() {
@@ -40,11 +45,8 @@ public class WebcamData {
         this.title = title;
     }
 
-    public Long getTime() {
+    public long getTime() {
         return time;
     }
 
-    public void setTime(Long time) {
-        this.time = time;
-    }
 }
