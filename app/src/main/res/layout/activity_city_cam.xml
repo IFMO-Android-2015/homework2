@@ -10,7 +10,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_marginTop="20dp"
-        android:layout_centerHorizontal="true">
+        android:layout_centerHorizontal="true"
+        android:id="@+id/frameLayout">
 
         <ImageView
             android:id="@+id/cam_image"
@@ -26,6 +27,54 @@
             android:layout_gravity="center"
             style="@android:style/Widget.Holo.Light.ProgressBar.Large.Inverse"/>
     </FrameLayout>
+    <TextView
+        android:id="@+id/debugText"
+        android:layout_width="320dp"
+        android:layout_height="200dp"
+        android:layout_below="@+id/frameLayout"
+        android:layout_centerHorizontal="true" />
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_below="@+id/frameLayout"
+        android:layout_alignLeft="@+id/frameLayout"
+        android:layout_alignStart="@+id/frameLayout"
+        android:id="@+id/Row1">
+        <TextView
+            android:id="@+id/text1"
+            android:layout_width="160dp"
+            android:layout_height="20dp"
+            android:layout_below="@+id/frameLayout"
+            android:layout_centerHorizontal="true" />
+        <TextView
+            android:id="@+id/text2"
+            android:layout_width="160dp"
+            android:layout_height="20dp"
+            android:layout_below="@+id/frameLayout"
+            android:layout_centerHorizontal="true" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_below="@+id/Row1"
+        android:layout_alignLeft="@+id/Row1"
+        android:layout_alignStart="@+id/Row1">
+        <TextView
+            android:id="@+id/text3"
+            android:layout_width="160dp"
+            android:layout_height="20dp"
+            android:layout_below="@+id/Row1"
+            android:layout_centerHorizontal="true" />
+        <TextView
+            android:id="@+id/text4"
+            android:layout_width="160dp"
+            android:layout_height="20dp"
+            android:layout_below="@+id/Row1"
+            android:layout_centerHorizontal="true" />
+    </TableRow>
 
     <!-- Добавьте сюда еще View с информацией о выбранном городе и показанной веб-камеры -->
 
