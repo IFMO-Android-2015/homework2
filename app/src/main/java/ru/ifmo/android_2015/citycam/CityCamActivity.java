@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -71,7 +72,7 @@ public class CityCamActivity extends AppCompatActivity {
         // в выбранном городе.
         if (savedInstanceState != null) {
             // Пытаемся получить ранее запущенный таск
-            downloadAndDecodeTask = (DownloadAndDecodeTask) getLastNonConfigurationInstance();
+            downloadAndDecodeTask = (DownloadAndDecodeTask) getLastCustomNonConfigurationInstance();
         }
         if (downloadAndDecodeTask == null) {
             // Создаем новый таск, только если не было ранее запущенного таска
@@ -80,18 +81,13 @@ public class CityCamActivity extends AppCompatActivity {
         } else {
             // Передаем в ранее запущенный таск текущий объект Activity
             downloadAndDecodeTask.attachActivity(this);
+            downloadAndDecodeTask.onPostExecute(null);
         }
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-
-    }
-
-    @Override
     public Object onRetainCustomNonConfigurationInstance() {
-        return super.onRetainCustomNonConfigurationInstance();
+        return downloadAndDecodeTask;
     }
 
     static class DownloadAndDecodeTask extends AsyncTask<Void, Void, Void> {
@@ -111,6 +107,11 @@ public class CityCamActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
+            drawMisc();
+
+        }
+
+        void drawMisc() {
             progressView.setVisibility(View.INVISIBLE);
             if (data == null) {
                 Toast.makeText(appContext, "К сожалению, в данном городе отсутствуют камеры", Toast.LENGTH_SHORT).show();
@@ -124,7 +125,6 @@ public class CityCamActivity extends AppCompatActivity {
                 sdf.setTimeZone(TimeZone.getTimeZone("GMT+3"));
                 time.setText(sdf.format(date));
             }
-
         }
 
         @Override
@@ -144,7 +144,8 @@ public class CityCamActivity extends AppCompatActivity {
         static WebcamData parse(URL cityURL) {
             try {
                 WebcamData data = new WebcamData();
-                JsonReader reader = new JsonReader(new InputStreamReader(cityURL.openStream(), "UTF-8"));
+                HttpURLConnection connection = (HttpURLConnection) cityURL.openConnection();
+                JsonReader reader = new JsonReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
                 reader.beginObject();
                 String name = reader.nextName();
                 while (reader.hasNext()) {
@@ -171,7 +172,8 @@ public class CityCamActivity extends AppCompatActivity {
                                             break;
                                         case "preview_url":
                                             URL url = new URL(reader.nextString());
-                                            data.setBitmap(BitmapFactory.decodeStream(url.openStream()));
+                                            HttpURLConnection connectionIm = (HttpURLConnection) url.openConnection();
+                                            data.setBitmap(BitmapFactory.decodeStream(connectionIm.getInputStream()));
                                             Log.i("PARSER", "found preview_url = " + url.toString());
                                             break label;
                                         case "last_update":
