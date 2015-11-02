@@ -5,12 +5,12 @@ package ru.ifmo.android_2015.citycam.model;
  */
 public final class LargeRussianCities {
 
-    private static final int COUNT = 90;
+    private static final int COUNT = 91;
 
     private static City[] cities = new City[COUNT];
 
     public static int getCount() {
-        return 90;
+        return COUNT;
     }
 
     public static City getCity(int position) {
@@ -112,6 +112,7 @@ public final class LargeRussianCities {
             case 87: return new City("Южно-Сахалинск", 46.959118, 142.738068 );
             case 88: return new City("Якутск", 62.027833, 129.704151);
             case 89: return new City("Ярославль", 57.626569, 39.893822);
+            case 90: return new City("Таганрог", 47.204346, 38.941827);
         }
         throw new IndexOutOfBoundsException("Position " + position
                 + " is out of bounds [" + 0 + "," + COUNT + ")");
