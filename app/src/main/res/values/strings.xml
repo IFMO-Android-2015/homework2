@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">City Cam</string>
+    <string name="titleText">Название</string>
+    <string name="authorText">Автор</string>
+    <string name="updatedText">Обновлено</string>
+    <string name="imageDescription">webcamview</string>
 </resources>
