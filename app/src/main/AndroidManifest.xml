@@ -18,5 +18,5 @@
         <activity android:name=".CityCamActivity"/>
 
     </application>
-
+    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

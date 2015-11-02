@@ -12,7 +12,7 @@ public final class Webcams {
 
     // Зарегистрируйтесь на http://ru.webcams.travel/developers/
     // и вставьте сюда ваш devid
-    private static final String DEV_ID = "Ваш devid";
+    private static final String DEV_ID = "f1c888d122ca63acbbd9b6875d093d0a";
 
     private static final String BASE_URL = "http://api.webcams.travel/rest";
 
@@ -25,6 +25,9 @@ public final class Webcams {
     private static final String METHOD_NEARBY = "wct.webcams.list_nearby";
 
     private static final String FORMAT_JSON = "json";
+
+    private Webcams() {
+    }
 
     /**
      * Возвращает URL для выполнения запроса Webcams API для получения
@@ -41,6 +44,4 @@ public final class Webcams {
                 .build();
         return new URL(uri.toString());
     }
-
-    private Webcams() {}
 }

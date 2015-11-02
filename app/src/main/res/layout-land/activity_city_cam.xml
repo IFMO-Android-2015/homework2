@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#fff">
@@ -9,9 +8,9 @@
         android:id="@+id/frame_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp">
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="20dp">
 
         <ImageView
             android:id="@+id/cam_image"
@@ -32,12 +31,14 @@
         android:id="@+id/linear_id"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/frame_layout"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@id/frame_layout"
         android:orientation="vertical"
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
         android:paddingTop="20dp"
         android:visibility="gone">
+
         <TextView
             android:id="@+id/webcam_title"
             android:layout_width="wrap_content"
@@ -45,6 +46,7 @@
             android:layout_marginBottom="@dimen/margin"
             android:text="@string/cam_title"
             android:textSize="@dimen/description_text_size" />
+
         <TextView
             android:id="@+id/webcam_city"
             android:layout_width="wrap_content"
@@ -52,6 +54,7 @@
             android:layout_marginBottom="@dimen/margin"
             android:text="@string/cam_city"
             android:textSize="@dimen/description_text_size" />
+
         <TextView
             android:id="@+id/webcam_rating"
             android:layout_width="wrap_content"
