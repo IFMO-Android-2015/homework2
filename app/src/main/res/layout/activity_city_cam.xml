@@ -10,22 +10,59 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_marginTop="20dp"
-        android:layout_centerHorizontal="true">
+        android:layout_centerHorizontal="true"
+        android:id="@+id/frameLayout">
 
         <ImageView
             android:id="@+id/cam_image"
             android:layout_width="320dp"
             android:layout_height="200dp"
             android:scaleType="centerCrop"
-            android:background="#999"/>
+            android:background="#999"
+            android:visibility="invisible" />
 
         <ProgressBar
             android:id="@+id/progress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            style="@android:style/Widget.Holo.Light.ProgressBar.Large.Inverse"/>
+            style="@android:style/Widget.Holo.Light.ProgressBar.Large.Inverse"
+            android:visibility="invisible" />
     </FrameLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/title_view"
+        android:textSize="24dp"
+        android:visibility="invisible"
+        android:layout_alignRight="@+id/frameLayout"
+        android:layout_alignEnd="@+id/frameLayout"
+        android:text="acd"
+        android:layout_below="@+id/frameLayout"
+        android:layout_alignLeft="@+id/frameLayout"
+        android:layout_alignStart="@+id/frameLayout" />
+
+    <RatingBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/rate_bar"
+        android:layout_marginTop="50dp"
+        android:visibility="invisible"
+        android:numStars="5"
+        android:clickable="false"
+        android:layout_below="@+id/title_view"
+        android:layout_alignRight="@+id/title_view"
+        android:layout_alignEnd="@+id/title_view" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/load_state_view"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="35dp"
+        android:visibility="visible" />
 
     <!-- Добавьте сюда еще View с информацией о выбранном городе и показанной веб-камеры -->
 
