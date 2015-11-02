@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#fff">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/title_view"
+        android:textSize="24dp"
+        android:visibility="invisible"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/rate_bar"
+        android:layout_alignEnd="@+id/rate_bar"
+        android:layout_marginTop="28dp"
+        android:layout_toRightOf="@+id/cam_image"
+        android:layout_toEndOf="@+id/cam_image"
+        android:layout_above="@+id/progress"
+        android:layout_marginLeft="10dp" />
+
+    <RatingBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/rate_bar"
+        android:visibility="invisible"
+        android:numStars="5"
+        android:clickable="false"
+        android:layout_below="@+id/progress"
+        android:layout_toEndOf="@+id/progress" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/load_state_view"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="15dp"
+        android:visibility="visible" />
+
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        style="@android:style/Widget.Holo.Light.ProgressBar.Large.Inverse"
+        android:visibility="invisible"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+
+    <ImageView
+        android:id="@+id/cam_image"
+        android:layout_width="320dp"
+        android:layout_height="200dp"
+        android:scaleType="centerCrop"
+        android:background="#999"
+        android:visibility="invisible"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="false"
+        android:layout_toStartOf="@+id/progress"
+        android:layout_toLeftOf="@+id/progress"
+        android:layout_marginLeft="5dp" />
+
+    <!-- Добавьте сюда еще View с информацией о выбранном городе и показанной веб-камеры -->
+
+</RelativeLayout>

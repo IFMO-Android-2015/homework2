@@ -6,6 +6,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RatingBar;
+import android.widget.TextView;
 
 import ru.ifmo.android_2015.citycam.model.City;
 
@@ -22,8 +24,12 @@ public class CityCamActivity extends AppCompatActivity {
 
     private City city;
 
-    private ImageView camImageView;
-    private ProgressBar progressView;
+     ImageView camImageView;
+     ProgressBar progressView;
+     TextView loadStateView, titleView;
+     RatingBar ratingBar;
+
+    private WebCamScope scope;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,13 +44,30 @@ public class CityCamActivity extends AppCompatActivity {
         setContentView(R.layout.activity_city_cam);
         camImageView = (ImageView) findViewById(R.id.cam_image);
         progressView = (ProgressBar) findViewById(R.id.progress);
+        ratingBar    = (RatingBar) findViewById(R.id.rate_bar);
+        loadStateView= (TextView) findViewById(R.id.load_state_view);
+        titleView    = (TextView) findViewById(R.id.title_view);
 
         getSupportActionBar().setTitle(city.name);
 
         progressView.setVisibility(View.VISIBLE);
 
+
         // Здесь должен быть код, инициирующий асинхронную загрузку изображения с веб-камеры
         // в выбранном городе.
+        if (savedInstanceState != null) {
+            scope = (WebCamScope) getLastCustomNonConfigurationInstance();
+        }
+        if (scope == null) {
+            scope = new WebCamScope(this, city);
+        } else {
+            scope.attachActivity(this);
+        }
+    }
+
+    @Override
+    public Object onRetainCustomNonConfigurationInstance() {
+        return scope;
     }
 
     private static final String TAG = "CityCam";
