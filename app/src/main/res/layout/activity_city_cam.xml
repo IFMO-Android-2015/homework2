@@ -1,31 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#fff">
 
     <FrameLayout
+        android:id="@+id/frame"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="20dp"
-        android:layout_centerHorizontal="true">
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp">
 
         <ImageView
             android:id="@+id/cam_image"
             android:layout_width="320dp"
             android:layout_height="200dp"
-            android:scaleType="centerCrop"
-            android:background="#999"/>
+            android:background="#999"
+            android:scaleType="centerCrop" />
+        <TextView
+            android:id="@+id/err"
+            android:layout_width="320dp"
+            android:layout_height="200dp"
+            android:visibility="invisible"
+            android:text="An error has occured"/>
 
         <ProgressBar
             android:id="@+id/progress"
+            style="@android:style/Widget.Holo.Light.ProgressBar.Large.Inverse"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            style="@android:style/Widget.Holo.Light.ProgressBar.Large.Inverse"/>
+            android:layout_gravity="center" />
     </FrameLayout>
+
+    <TextView
+        android:id = "@+id/info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/frame"
+        android:visibility="invisible"
+        android:layout_marginTop="10dp"
+        android:layout_alignStart="@id/frame"
+        android:layout_alignLeft="@id/frame"
+        android:layout_alignEnd="@id/frame"
+        android:layout_alignRight="@id/frame"
+        />
 
     <!-- Добавьте сюда еще View с информацией о выбранном городе и показанной веб-камеры -->
 
