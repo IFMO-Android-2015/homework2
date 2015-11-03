@@ -6,6 +6,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
+
 
 import ru.ifmo.android_2015.citycam.model.City;
 
@@ -20,22 +22,24 @@ public class CityCamActivity extends AppCompatActivity {
      */
     public static final String EXTRA_CITY = "city";
 
-    private City city;
-
-    private ImageView camImageView;
-    private ProgressBar progressView;
+    City city;
+    TextView error;
+    ImageView camImageView;
+    ProgressBar progressView;
+    private WebCamAsyncTask webCamTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         city = getIntent().getParcelableExtra(EXTRA_CITY);
-        if (city == null) {
+        if (city== null) {
             Log.w(TAG, "City object not provided in extra parameter: " + EXTRA_CITY);
             finish();
         }
-
         setContentView(R.layout.activity_city_cam);
+        error = (TextView)findViewById(R.id.error);
+        error.setVisibility(View.INVISIBLE);
         camImageView = (ImageView) findViewById(R.id.cam_image);
         progressView = (ProgressBar) findViewById(R.id.progress);
 
@@ -43,9 +47,27 @@ public class CityCamActivity extends AppCompatActivity {
 
         progressView.setVisibility(View.VISIBLE);
 
-        // Здесь должен быть код, инициирующий асинхронную загрузку изображения с веб-камеры
-        // в выбранном городе.
+        if (savedInstanceState != null) {
+            // Пытаемся получить ранее запущенный таск
+            webCamTask = (WebCamAsyncTask) getLastCustomNonConfigurationInstance();
+        }
+        if (webCamTask == null) {
+            // Создаем новый таск, только если не было ранее запущенного таска
+            webCamTask = new WebCamAsyncTask(this);
+            webCamTask.execute();
+        } else {
+            // Передаем в ранее запущенный таск текущий объект Activity
+            webCamTask.attachActivity(this);
+        }
     }
+
+    public Object onRetainCustomNonConfigurationInstance() {
+        return webCamTask;
+    }
+
+
+
+
 
     private static final String TAG = "CityCam";
 }
