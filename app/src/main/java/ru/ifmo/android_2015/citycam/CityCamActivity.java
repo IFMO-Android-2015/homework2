@@ -1,5 +1,7 @@
 package ru.ifmo.android_2015.citycam;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -7,7 +9,20 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
+import com.google.gson.Gson;
+
+import org.ocpsoft.prettytime.PrettyTime;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Date;
+import java.util.Locale;
+
+import ru.ifmo.android_2015.citycam.api.RestClient;
 import ru.ifmo.android_2015.citycam.model.City;
+import ru.ifmo.android_2015.citycam.model.WebCamsResult;
 
 /**
  * Экран, показывающий веб-камеру одного выбранного города.
@@ -41,10 +56,9 @@ public class CityCamActivity extends AppCompatActivity {
 
         getSupportActionBar().setTitle(city.name);
 
-        progressView.setVisibility(View.VISIBLE);
+        WebCamLoaderTask task = new WebCamLoaderTask(this);
+        task.execute(city);
 
-        // Здесь должен быть код, инициирующий асинхронную загрузку изображения с веб-камеры
-        // в выбранном городе.
     }
 
     private static final String TAG = "CityCam";

@@ -1,45 +1,46 @@
 package ru.ifmo.android_2015.citycam;
 
 import android.content.Intent;
-import android.graphics.Color;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
-import ru.ifmo.android_2015.citycam.list.CitiesRecyclerAdapter;
+import com.google.gson.Gson;
+
+import org.ocpsoft.prettytime.PrettyTime;
+
+import java.util.Date;
+import java.util.Locale;
+
+import ru.ifmo.android_2015.citycam.api.RestClient;
+import ru.ifmo.android_2015.citycam.fragments.OnFragmentInteractionListener;
+import ru.ifmo.android_2015.citycam.fragments.SelectCityFragment;
 import ru.ifmo.android_2015.citycam.list.CitySelectedListener;
-import ru.ifmo.android_2015.citycam.list.RecylcerDividersDecorator;
 import ru.ifmo.android_2015.citycam.model.City;
+import ru.ifmo.android_2015.citycam.model.WebCamsResult;
 
-public class SelectCityActivity extends AppCompatActivity
-        implements CitySelectedListener {
+public class SelectCityActivity extends AppCompatActivity implements OnFragmentInteractionListener {
 
-    // Прокручивающийся список городов
-    private RecyclerView recyclerView;
+    public static final String TAG = "CityCam";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_city);
-        recyclerView = (RecyclerView) findViewById(R.id.list);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.addItemDecoration(new RecylcerDividersDecorator(Color.DKGRAY));
-        CitiesRecyclerAdapter adapter = new CitiesRecyclerAdapter(this);
-        adapter.setCitySelectedListener(this);
-        recyclerView.setAdapter(adapter);
+        openFragment(new SelectCityFragment());
+    }
+
+    public void openFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction().add(R.id.content, fragment).addToBackStack(null).commit();
     }
 
     @Override
-    public void onCitySelected(City city) {
-        Log.i(TAG, "onCitySelected: " + city);
-        // Запускаем экран CityCamActivity, который покажет веб-камеру из выбранного города
-        Intent cityCam = new Intent(this, CityCamActivity.class);
-        cityCam.putExtra(CityCamActivity.EXTRA_CITY, city);
-        startActivity(cityCam);
+    public void onFragmentInteraction(String id) {
+        Log.d(TAG, "onFragmentInteraction - id="+id);
     }
-
-    private static final String TAG = "SelectCity";
-
 }
