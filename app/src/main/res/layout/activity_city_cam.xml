@@ -62,7 +62,7 @@
                 android:layout_width="70dp"
                 android:layout_height="50dp"
                 android:text="&#60;"
-                android:textSize="30sp"
+                android:textSize="20sp"
                 android:onClick="previousCamera"
                 />
             <TextView
@@ -71,13 +71,13 @@
                 android:text="0"
                 android:gravity="center"
                 android:textIsSelectable="false"
-                android:textSize="30sp"
+                android:textSize="20sp"
                 android:id="@+id/camnum"/>
             <Button
                 android:layout_width="70dp"
                 android:layout_height="50dp"
                 android:text="&#62;"
-                android:textSize="30sp"
+                android:textSize="20sp"
                 android:onClick="nextCamera"/>
         </LinearLayout>
         <TextView
@@ -90,7 +90,7 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:text="&#8634;"
-            android:textSize="30sp"
+            android:textSize="20sp"
             android:onClick="reloadCamera"/>
     </LinearLayout>
 </RelativeLayout>
