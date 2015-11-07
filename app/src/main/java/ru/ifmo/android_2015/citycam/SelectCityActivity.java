@@ -13,8 +13,7 @@ import ru.ifmo.android_2015.citycam.list.CitySelectedListener;
 import ru.ifmo.android_2015.citycam.list.RecylcerDividersDecorator;
 import ru.ifmo.android_2015.citycam.model.City;
 
-public class SelectCityActivity extends AppCompatActivity
-        implements CitySelectedListener {
+public class SelectCityActivity extends AppCompatActivity implements CitySelectedListener {
 
     // Прокручивающийся список городов
     private RecyclerView recyclerView;
