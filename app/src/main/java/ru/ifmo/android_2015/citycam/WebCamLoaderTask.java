@@ -1,17 +1,16 @@
 package ru.ifmo.android_2015.citycam;
 
-import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.ocpsoft.prettytime.PrettyTime;
 
@@ -22,6 +21,7 @@ import java.net.URL;
 import java.util.Date;
 import java.util.Locale;
 
+import ru.ifmo.android_2015.citycam.activities.CityCamActivity;
 import ru.ifmo.android_2015.citycam.api.RestClient;
 import ru.ifmo.android_2015.citycam.model.City;
 import ru.ifmo.android_2015.citycam.model.WebCam;
@@ -36,70 +36,106 @@ public class WebCamLoaderTask extends AsyncTask<City, Integer, Bitmap> {
     private ProgressBar progressView;
     private TextView updated;
 
+    private CityCamActivity activity;
     private Context context;
+    private ConnectivityManager manager;
 
-    private long t;
-    private boolean isGood;
+    private enum DownloadResult {
+        SUCCESS, ERROR, IN_PROGRESS, NO_INTERNET
+    }
+    private DownloadResult result = null;
 
-    public WebCamLoaderTask(Context context) {
-        this.context = context;
-        this.camImageView = (ImageView)((Activity)context).findViewById(R.id.cam_image);
-        this.progressView = (ProgressBar)((Activity)context).findViewById(R.id.progress);
-        this.updated = (TextView)((Activity)context).findViewById(R.id.updated);
+    private Bitmap bitmap;
+    private WebCam webCam;
+
+    public WebCamLoaderTask(CityCamActivity activity) {
+        this.activity = activity;
+        this.context = activity.getApplicationContext();
+        manager = (ConnectivityManager)activity.getApplicationContext()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
+        result = DownloadResult.IN_PROGRESS;
+
+        progressView = (ProgressBar)activity.findViewById(R.id.progress);
         progressView.setVisibility(View.VISIBLE);
-        isGood = false;
     }
 
     @Override
     protected Bitmap doInBackground(City... params) {
-        City city = params[0];
-        WebCamsResult result = RestClient.webCams(city.latitude, city.longitude);
-        if (result == null) {
-            Log.e("CityCam", "result is null");
+        if (!isNetworkAvailable()) {
+            result = DownloadResult.NO_INTERNET;
             return null;
+        }
+        City city = params[0];
+        WebCamsResult webCamsResult = RestClient.webCams(city.latitude, city.longitude);
+        if (webCamsResult == null) {
+            result = DownloadResult.ERROR;
         } else {
-            Bitmap bitmap;
-            if (!result.getWebcams().getWebcam().isEmpty()) {
-                WebCam cam = result.getWebcams().getWebcam().get(0);
-                String url = cam.getPreviewUrl();
-                t = cam.getLastUpdate();
-                bitmap = getBitmapFromURL(url);
-                isGood = true;
+            if (!webCamsResult.getWebcams().getWebcam().isEmpty()) {
+                webCam = webCamsResult.getWebcams().getWebcam().get(0);
+                bitmap = getBitmapFromURL(webCam.getPreviewUrl());
+                result = DownloadResult.SUCCESS;
             } else {
                 bitmap = BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher);
+                result = DownloadResult.ERROR;
             }
-            return bitmap;
         }
+        return bitmap;
     }
 
-    public Bitmap getBitmapFromURL(String src) {
+    @Override
+    protected void onPostExecute(Bitmap bitmap) {
+        super.onPostExecute(bitmap);
+        progressView = (ProgressBar)activity.findViewById(R.id.progress);
+        progressView.setVisibility(View.GONE);
+        updateUI();
+    }
+
+    /**
+     * Этот метод вызывается, когда новый объект Activity подключается к
+     * данному таску после смены конфигурации.
+     *
+     * @param activity новый объект Activity
+     */
+    public void attachActivity(CityCamActivity activity) {
+        this.activity = activity;
+        updateUI();
+    }
+
+    private Bitmap getBitmapFromURL(String src) {
+        Bitmap bitmap = null;
         try {
             URL url = new URL(src);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setDoInput(true);
             connection.connect();
             InputStream input = connection.getInputStream();
-            Bitmap myBitmap = BitmapFactory.decodeStream(input);
-            return myBitmap;
-        } catch (IOException e) {
-            // Log exception
-            return null;
+            bitmap = BitmapFactory.decodeStream(input);
+        } catch (IOException ignored) {}
+        return bitmap;
+    }
+
+    private void updateUI() {
+        if (result == DownloadResult.SUCCESS) {
+            camImageView = (ImageView)activity.findViewById(R.id.cam_image);
+            camImageView.setImageBitmap(bitmap);
+            PrettyTime p = new PrettyTime(new Locale("ru"));
+            updated = (TextView)activity.findViewById(R.id.updated);
+            updated.setText("Последнее обновление: " + p.format(new Date(t * 1000)));
+        } else if (result == DownloadResult.ERROR) {
+
+        } else if (result == DownloadResult.NO_INTERNET) {
+            Toast.makeText(activity, "Проверьте Ваше соединение с интернетом", Toast.LENGTH_SHORT).show();
         }
     }
 
-    @Override
-    protected void onPostExecute(Bitmap bitmap) {
-        super.onPostExecute(bitmap);
-        camImageView.setImageBitmap(bitmap);
-        progressView.setVisibility(View.GONE);
-        if (isGood) {
-            PrettyTime p = new PrettyTime(new Locale("ru"));
-            updated.setText("Последнее обновление: " + p.format(new Date(t * 1000)));
-        }
+    private boolean isNetworkAvailable() {
+        NetworkInfo networkInfo = manager.getActiveNetworkInfo();
+        return (networkInfo != null && networkInfo.isConnected());
     }
+
 }

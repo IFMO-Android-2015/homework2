@@ -12,9 +12,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import ru.ifmo.android_2015.citycam.CityCamActivity;
+import ru.ifmo.android_2015.citycam.Constants;
 import ru.ifmo.android_2015.citycam.R;
-import ru.ifmo.android_2015.citycam.SelectCityActivity;
+import ru.ifmo.android_2015.citycam.activities.CityCamActivity;
 import ru.ifmo.android_2015.citycam.list.CitiesRecyclerAdapter;
 import ru.ifmo.android_2015.citycam.list.CitySelectedListener;
 import ru.ifmo.android_2015.citycam.list.RecylcerDividersDecorator;
@@ -49,8 +49,7 @@ public class SelectCityFragment extends Fragment implements CitySelectedListener
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public SelectCityFragment() {
-    }
+    public SelectCityFragment() {}
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -96,14 +95,6 @@ public class SelectCityFragment extends Fragment implements CitySelectedListener
         mListener = null;
     }
 
-    /**
-     * The default content for this Fragment has a TextView that is shown when
-     * the list is empty. If you would like to change the text, call this method
-     * to supply the text it should use.
-     */
-    public void setEmptyText(CharSequence emptyText) {
-    }
-
     @Override
     public void onCitySelected(City city) {
         if (null != mListener) {
@@ -111,8 +102,8 @@ public class SelectCityFragment extends Fragment implements CitySelectedListener
             // fragment is attached to one) that an item has been selected.
             mListener.onFragmentInteraction(city.name);
         }
-        Log.i(SelectCityActivity.TAG, "onCitySelected: " + city);
-        // Запускаем экран CityCamActivity, который покажет веб-камеру из выбранного города
+        Log.i(Constants.TAG, "onCitySelected: " + city);
+
         Intent cityCam = new Intent(getActivity(), CityCamActivity.class);
         cityCam.putExtra(CityCamActivity.EXTRA_CITY, city);
         startActivity(cityCam);

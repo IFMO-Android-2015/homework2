@@ -1,6 +1,5 @@
 package ru.ifmo.android_2015.citycam.api;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -9,8 +8,7 @@ import java.io.IOException;
 import retrofit.GsonConverterFactory;
 import retrofit.Response;
 import retrofit.Retrofit;
-import ru.ifmo.android_2015.citycam.CityCamActivity;
-import ru.ifmo.android_2015.citycam.SelectCityActivity;
+import ru.ifmo.android_2015.citycam.Constants;
 import ru.ifmo.android_2015.citycam.model.WebCamsResult;
 
 /**
@@ -37,7 +35,7 @@ public class RestClient {
         try {
              result = getService().webCams(lat, lng).execute();
         } catch (IOException e) {
-            Log.e(SelectCityActivity.TAG, e.getMessage());
+            Log.e(Constants.TAG, e.getMessage());
         }
         return (result == null ? null : result.body());
     }
