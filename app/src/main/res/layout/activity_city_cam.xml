@@ -5,28 +5,92 @@
     android:layout_height="match_parent"
     android:background="#fff">
 
-    <FrameLayout
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="20dp"
-        android:layout_centerHorizontal="true">
+        android:layout_centerHorizontal="true"
+        android:orientation="vertical"
+        android:id="@+id/linearLayout">
 
-        <ImageView
-            android:id="@+id/cam_image"
-            android:layout_width="320dp"
-            android:layout_height="200dp"
-            android:scaleType="centerCrop"
-            android:background="#999"/>
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp">
 
-        <ProgressBar
-            android:id="@+id/progress"
+
+            <ImageView
+                android:id="@+id/cam_image"
+                android:layout_width="320dp"
+                android:layout_height="200dp"
+                android:background="#999"
+                android:scaleType="centerCrop"/>
+
+            <ProgressBar
+                android:id="@+id/progress"
+                style="@android:style/Widget.Holo.Light.ProgressBar.Large.Inverse"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"/>
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginTop="5dp"
+                android:id="@+id/online_image"
+                android:layout_gravity="right|top"
+                android:background="@drawable/gray_circle"/>
+        </FrameLayout>
+
+        <RatingBar
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            style="@android:style/Widget.Holo.Light.ProgressBar.Large.Inverse"/>
-    </FrameLayout>
+            android:id="@+id/rating_bar"
+            android:numStars="5"
+            android:stepSize="0.1"
+            android:isIndicator="true"/>
 
-    <!-- Добавьте сюда еще View с информацией о выбранном городе и показанной веб-камеры -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center">
 
+            <Button
+                android:layout_width="70dp"
+                android:layout_height="50dp"
+                android:text="&#60;"
+                android:textSize="20sp"
+                android:onClick="previousCamera"
+                />
+            <TextView
+                android:layout_width="40dp"
+                android:layout_height="50dp"
+                android:text="0"
+                android:gravity="center"
+                android:textIsSelectable="false"
+                android:textSize="20sp"
+                android:id="@+id/camnum"/>
+            <Button
+                android:layout_width="70dp"
+                android:layout_height="50dp"
+                android:text="&#62;"
+                android:textSize="20sp"
+                android:onClick="nextCamera"/>
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Доступно камер: n/Error message"
+            android:textSize="25sp"
+            android:id="@+id/info"/>
+        <Button
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:text="&#8634;"
+            android:textSize="20sp"
+            android:onClick="reloadCamera"/>
+    </LinearLayout>
 </RelativeLayout>
