@@ -8,17 +8,17 @@
     <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="20dp"
+        android:id="@+id/frameLayout"
+        android:layout_below="@+id/title"
         android:layout_centerHorizontal="true"
-        android:id="@+id/frameLayout">
+        android:layout_marginTop="10dp">
 
         <ImageView
             android:id="@+id/cam_image"
             android:layout_width="320dp"
             android:layout_height="200dp"
             android:scaleType="centerCrop"
-            android:background="#999"
+            android:background="#ddd"
             android:adjustViewBounds="false" />
 
         <ProgressBar
@@ -28,12 +28,40 @@
             android:layout_gravity="center"
             style="@android:style/Widget.Holo.Light.ProgressBar.Large.Inverse"/>
 
+        <ImageView
+            android:id="@+id/failed_image"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:scaleType="centerCrop"
+            android:adjustViewBounds="false"
+            android:layout_gravity="center"
+            android:visibility="invisible"
+            android:src="@drawable/ic_clear_black_48dp"/>
+
+        <TextView
+            android:id="@+id/failed_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50dp"
+            android:gravity="center"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Subhead"
+            android:layout_gravity="center" />
 
 
     </FrameLayout>
 
     <TextView
-        android:id="@+id/updated"
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Subhead" />
+
+    <TextView
+        android:id="@+id/last_update"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/frameLayout"
@@ -43,13 +71,13 @@
         android:gravity="center" />
 
     <TextView
-        android:id="@+id/viewCount"
+        android:id="@+id/view_count"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/updated"
+        android:layout_below="@+id/last_update"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <!-- Добавьте сюда еще View с информацией о выбранном городе и показанной веб-камеры -->
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="10dp"
+        android:gravity="center" />
 
 </RelativeLayout>

@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">City Cam</string>
+    <string name="property_last_update">"Последнее обновление: "</string>
+    <string name="message_check_internet_connection">Проверьте Ваше соединение с интернетом</string>
 </resources>
