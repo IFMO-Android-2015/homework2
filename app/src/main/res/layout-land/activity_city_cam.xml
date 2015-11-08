@@ -8,10 +8,10 @@
     <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="20dp"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/frameLayout">
+        android:id="@+id/frameLayout"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
 
         <ImageView
             android:id="@+id/cam_image"
@@ -35,15 +35,17 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:weightSum="1"
-        android:layout_below="@+id/frameLayout">
+        android:layout_toRightOf="@+id/frameLayout"
+        android:layout_toEndOf="@+id/frameLayout"
+        android:layout_alignParentTop="true">
 
         <TextView
             android:id="@+id/textTitle"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="0.4"
-            android:layout_gravity="center"
-            android:layout_marginLeft="3pt"
+            android:gravity="bottom"
+            android:layout_marginLeft="6pt"
             android:layout_marginRight="3pt"
             android:text="Загрузка..."
             android:textSize="12pt" />
@@ -53,7 +55,8 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="0.6"
-            android:layout_marginLeft="3pt"
+            android:layout_marginLeft="6pt"
+            android:layout_marginRight="3pt"
             android:textSize="16pt"
             android:text="Загрузка..." />
 
