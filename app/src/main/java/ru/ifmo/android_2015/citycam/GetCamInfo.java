@@ -20,15 +20,15 @@ import java.net.URL;
 import java.util.Random;
 
 import ru.ifmo.android_2015.citycam.model.City;
-import ru.ifmo.android_2015.citycam.webcams.Webcam;
+import ru.ifmo.android_2015.citycam.model.Webcam;
 import ru.ifmo.android_2015.citycam.webcams.Webcams;
 
 
 public class GetCamInfo extends AsyncTask<City, Void, Integer> {
     private CityCamActivity activity;
-    public Status status = Status.NOTLOADED;
+    private Status status = Status.NOTLOADED;
 
-    public enum Status {
+    private enum Status {
         NOTLOADED, DOWNLOADING, READY, ERROR
     }
 
@@ -47,6 +47,7 @@ public class GetCamInfo extends AsyncTask<City, Void, Integer> {
     @Override
     protected Integer doInBackground(City... params) {
         City city = params[0];
+
         try {
             getInfo(city);
         } catch (Exception e) {
@@ -63,13 +64,16 @@ public class GetCamInfo extends AsyncTask<City, Void, Integer> {
         InputStreamReader in = null;
         Log.i(TAG, "Getting info");
         Webcam ans = null;
+
         try {
             url = (HttpURLConnection) Webcams.createNearbyUrl(city.latitude, city.longitude).openConnection();
             in = new InputStreamReader(url.getInputStream());
+
             if (url.getResponseCode() != 200) {
                 Log.e(TAG, "Bad response from server:" + url.getResponseCode());
                 throw new IOException("Bad response from server:" + url.getResponseCode());
             }
+
             BufferedReader bufferedReader = new BufferedReader(in);
             StringBuilder stringBuilder = new StringBuilder();
             String line;
@@ -77,10 +81,12 @@ public class GetCamInfo extends AsyncTask<City, Void, Integer> {
                 stringBuilder.append(line).append("\n");
             }
             bufferedReader.close();
+
             JSONObject response = new JSONObject(stringBuilder.toString());
             JSONArray cams = response.getJSONObject("webcams").getJSONArray("webcam");
             int count = cams.length();
             Log.i(TAG, "Number of cams: " + count);
+
             if (count != 0) {
                 Random random = new Random();
                 JSONObject cam;

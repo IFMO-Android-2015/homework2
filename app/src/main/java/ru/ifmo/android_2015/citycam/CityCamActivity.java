@@ -9,7 +9,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import ru.ifmo.android_2015.citycam.model.City;
-import ru.ifmo.android_2015.citycam.webcams.Webcam;
+import ru.ifmo.android_2015.citycam.model.Webcam;
 
 /**
  * Экран, показывающий веб-камеру одного выбранного города.
@@ -89,7 +89,7 @@ public class CityCamActivity extends AppCompatActivity {
     }
 
     public void showEmpty() {
-        camImageView.setImageResource(R.drawable.error);
+        camImageView.setImageResource(R.drawable.error1);
         title.setText("Нет камер");
         info.setText("Нет информации о камере");
     }
