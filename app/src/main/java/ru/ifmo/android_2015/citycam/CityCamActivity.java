@@ -97,7 +97,8 @@ public class CityCamActivity extends AppCompatActivity {
     public void showWebcam() {
         camImageView.setImageBitmap(webcam.getPreview());
         title.setText(webcam.getTitle());
-        info.setText("Рейтинг: " + webcam.getRating() + "\nTimezone: " + webcam.getTimezone() + "\nGMT: " + webcam.getTimeOffset());
+        String inf = "Рейтинг: "+webcam.getRating() + "\nTimezone: " + webcam.getTimezone() + "\nGMT: " + webcam.getTimeOffset();
+        info.setText(inf);
     }
 
     private static final String TAG = "CityCam";
