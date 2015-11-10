@@ -5,9 +5,13 @@ import android.graphics.BitmapFactory;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.JsonReader;
+import android.util.JsonToken;
+import android.util.Log;
 
+import java.io.Closeable;
 import java.io.IOException;
-import java.io.Reader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -61,63 +65,101 @@ public class Util {
         };
     }
 
+    // Closing objects without throwing errors
+
+    private static void closeQuietly(Closeable c) {
+        if (c != null) {
+            try {
+                c.close();
+            } catch (IOException e) {
+                Log.e("UTIL", "Failed to close resource: " + e.getMessage());
+            }
+        }
+    }
 
     public static Bitmap downloadBitmap(String url) throws IOException {
-        HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-        return BitmapFactory.decodeStream(conn.getInputStream());
-    }
-
-    private static void skip(JsonReader js, int k) throws IOException {
-        for (int i = 0; i < k; i++) {
-            js.skipValue();
-            js.skipValue();
+        HttpURLConnection conn = null;
+        InputStream in = null;
+        try {
+            conn = (HttpURLConnection) new URL(url).openConnection();
+            in = conn.getInputStream();
+            return BitmapFactory.decodeStream(in);
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+            closeQuietly(in);
         }
     }
 
-    public static WebcamInfo parseRespond(Reader in) throws IOException {
-        JsonReader json = new JsonReader(in);
-        json.beginObject();
-        json.nextName();
-        String status = json.nextString();
-        if (!status.equals("ok")) {
-            throw new IOException("Request failed");
+    public static WebcamInfo parseRespond(HttpURLConnection connection) throws IOException {
+        InputStream stream = null;
+        InputStreamReader inputReader = null;
+        JsonReader json = null;
+        try {
+            stream = connection.getInputStream();
+            inputReader = new InputStreamReader(stream);
+            json = new JsonReader(inputReader);
+
+            json.beginObject();
+
+            int view_count = -1;
+            double rating = -1;
+            String country = null, city = null, url = null;
+
+            while (json.hasNext()) {
+                if (json.peek() == JsonToken.BEGIN_OBJECT) {
+                    json.beginObject();
+                }
+
+                String name = json.nextName();
+                switch (name) {
+                    case "status":
+                        String status = json.nextString();
+                        if (!status.equals("ok")) {
+                            throw new IOException("Request failed");
+                        }
+                        break;
+                    case "webcams":
+                        json.beginObject();
+                        break;
+                    case "count":
+                        int count = json.nextInt();
+                        if (count == 0) {
+                            throw new WebcamNotFoundException();
+                        }
+                        break;
+                    case "webcam":
+                        json.beginArray();
+                        break;
+                    case "view_count":
+                        view_count = json.nextInt();
+                        break;
+                    case "country":
+                        country = json.nextString();
+                        break;
+                    case "city":
+                        city = json.nextString();
+                        break;
+                    case "rating_avg":
+                        rating = json.nextDouble();
+                        break;
+                    case "preview_url":
+                        url = json.nextString();
+                        break;
+                    default:
+                        json.skipValue();
+                        break;
+                }
+                if (json.peek() == JsonToken.END_OBJECT) {
+                    return new WebcamInfo(url, country, city, view_count, rating);
+                }
+            }
+        } finally {
+            closeQuietly(json);
+            closeQuietly(inputReader);
+            closeQuietly(stream);
         }
-        json.skipValue();
-        json.beginObject();
-
-        json.skipValue();
-        if (json.nextInt() == 0) {
-            throw new WebcamNotFoundException();
-        }
-
-        skip(json, 2);
-
-        json.skipValue();
-        json.beginArray();
-        json.beginObject();
-        skip(json, 5);
-
-        json.skipValue();
-        int view_count = json.nextInt();
-
-        skip(json, 8);
-        json.skipValue();
-        String country = json.nextString();
-
-        json.skipValue();
-        String city = json.nextString();
-
-        skip(json, 1);
-
-        json.skipValue();
-        double rating = json.nextDouble();
-
-        skip(json, 10);
-
-        json.skipValue();
-        String url = json.nextString();
-
-        json.close();
-        return new WebcamInfo(url, country, city, view_count, rating);
+        return null;
     }
 }

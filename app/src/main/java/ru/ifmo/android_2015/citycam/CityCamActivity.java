@@ -12,10 +12,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.text.DecimalFormat;
-import java.util.Locale;
 
 import ru.ifmo.android_2015.citycam.model.City;
 import ru.ifmo.android_2015.citycam.model.Util;
@@ -29,14 +27,14 @@ import ru.ifmo.android_2015.citycam.webcams.Webcams;
 public class CityCamActivity extends AppCompatActivity {
 
     /**
-     * Обязательный extra параметр - объект City, камеру которого надо показать.
+     * Обязательный extra парамеhтр - объект City, камеру которого надо показать.
      */
     public static final String EXTRA_CITY = "city";
 
     private City city;
     private Bitmap picture;
     private Util.WebcamInfo info;
-    private Result state;
+    private Integer state;
     private DownloadTask downloadTask;
 
     private ImageView camImageView;
@@ -69,7 +67,7 @@ public class CityCamActivity extends AppCompatActivity {
         if (savedInstanceState != null) {
             city = savedInstanceState.getParcelable("city");
             picture = savedInstanceState.getParcelable("picture");
-            state = (Result) savedInstanceState.getSerializable("state");
+            state = savedInstanceState.getInt("state");
             info = savedInstanceState.getParcelable("info");
         } else {
             city = getIntent().getParcelableExtra(EXTRA_CITY);
@@ -86,10 +84,10 @@ public class CityCamActivity extends AppCompatActivity {
         errorLayout.setVisibility(View.GONE);
 
         switch (state) {
-            case OK:
+            case Result.OK:
                 setActivityContent(this, info);
                 break;
-            case NOCAM:
+            case Result.NOCAM:
                 setWebcamNotFoundContent(this);
                 break;
             default:
@@ -100,7 +98,7 @@ public class CityCamActivity extends AppCompatActivity {
                 }
                 if (downloadTask == null) {
                     downloadTask = new DownloadTask(this);
-                    downloadTask.execute();
+                    downloadTask.execute(city);
                 } else {
                     downloadTask.attachActivity(this);
                 }
@@ -111,7 +109,7 @@ public class CityCamActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle outState) {
         outState.putParcelable("picture", picture);
         outState.putParcelable("city", city);
-        outState.putSerializable("state", state);
+        outState.putInt("state", state);
         outState.putParcelable("info", info);
         super.onSaveInstanceState(outState);
     }
@@ -121,8 +119,11 @@ public class CityCamActivity extends AppCompatActivity {
         return downloadTask;
     }
 
-    private enum Result {
-        PROGRESS, OK, NOCAM, ERROR
+    private class Result {
+        public static final int PROGRESS = 0;
+        public static final int OK = 1;
+        public static final int NOCAM = 2;
+        public static final int ERROR = 3;
     }
 
     private void setActivityContent(CityCamActivity activity, Util.WebcamInfo info) {
@@ -143,7 +144,7 @@ public class CityCamActivity extends AppCompatActivity {
         activity.errorInfo.setText("Вебкамеры не найдены");
     }
 
-    private class DownloadTask extends AsyncTask<Void, Void, Result> {
+    private static class DownloadTask extends AsyncTask<City, Void, Integer> {
         private CityCamActivity activity;
         private Util.WebcamInfo info;
         private Bitmap picture;
@@ -157,40 +158,47 @@ public class CityCamActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Result doInBackground(Void... params) {
+        protected Integer doInBackground(City... cities) {
             Log.i(TAG, "Task started");
-            try {
-                HttpURLConnection conn = (HttpURLConnection)
-                        Webcams.createNearbyUrl(city.latitude, city.longitude)
-                                .openConnection();
+            City city = cities[0];
 
-                info = Util.parseRespond(new InputStreamReader(conn.getInputStream()));
+            HttpURLConnection conn = null;
+            try {
+                conn = (HttpURLConnection) Webcams
+                        .createNearbyUrl(city.latitude, city.longitude)
+                        .openConnection();
+
+                info = Util.parseRespond(conn);
                 picture = Util.downloadBitmap(info.pictureUrl);
                 return Result.OK;
             } catch (WebcamNotFoundException e) {
                 return Result.NOCAM;
             } catch (IOException e) {
                 Log.e("!", "Some error: " + e.getMessage());
+            } finally {
+                if (conn != null) {
+                    conn.disconnect();
+                }
             }
 
             return Result.ERROR;
         }
 
         @Override
-        protected void onPostExecute(Result res) {
+        protected void onPostExecute(Integer res) {
             super.onPostExecute(res);
             activity.progressView.setVisibility(View.GONE);
             activity.state = res;
             switch (res) {
-                case OK:
+                case Result.OK:
                     activity.picture = picture;
                     activity.info = info;
-                    setActivityContent(activity, info);
+                    activity.setActivityContent(activity, info);
                     break;
-                case NOCAM:
-                    setWebcamNotFoundContent(activity);
+                case Result.NOCAM:
+                    activity.setWebcamNotFoundContent(activity);
                     break;
-                case ERROR:
+                case Result.ERROR:
                     activity.errorLayout.setVisibility(View.VISIBLE);
                     activity.errorInfo.setText("Данные не получены. \nПроверьте подключение к сети");
                     break;
