@@ -6,8 +6,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import ru.ifmo.android_2015.citycam.model.City;
+import ru.ifmo.android_2015.citycam.DownloadAsynkTask;
 
 /**
  * Экран, показывающий веб-камеру одного выбранного города.
@@ -24,6 +26,8 @@ public class CityCamActivity extends AppCompatActivity {
 
     private ImageView camImageView;
     private ProgressBar progressView;
+    private TextView name, title, coordinates, latitude, latTitle, longitude, lonTitle;
+    private DownloadAsyncTask downloadTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,11 +42,26 @@ public class CityCamActivity extends AppCompatActivity {
         setContentView(R.layout.activity_city_cam);
         camImageView = (ImageView) findViewById(R.id.cam_image);
         progressView = (ProgressBar) findViewById(R.id.progress);
+        name = (TextView) findViewById(R.id.cam_name);
+        title = (TextView) findViewById(R.id.cam_title);
+        coordinates = (TextView) findViewById(R.id.coordinates);
+        latTitle = (TextView) findViewById(R.id.latitude_title);
+        latitude = (TextView) findViewById(R.id.latitude);
+        lonTitle = (TextView) findViewById(R.id.longitude_title);
+        longitude= (TextView) findViewById(R.id.longitude);
 
         getSupportActionBar().setTitle(city.name);
 
         progressView.setVisibility(View.VISIBLE);
-
+        name.setVisibility(View.INVISIBLE);
+        if (savedInstanceState != null) {
+            downloadTask = (DownloadAsyncTask) getLastCustomNonConfigurationInstance();
+        }
+        if (downloadTask == null) {
+            downloadTask = new DownloadAsyncTask(this);
+            downloadTask.execute(city);
+        } else
+            downloadTask.attachActivity(this);
         // Здесь должен быть код, инициирующий асинхронную загрузку изображения с веб-камеры
         // в выбранном городе.
     }
