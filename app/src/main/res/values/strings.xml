@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">City Cam</string>
+    <string name="country_t">Страна: </string>
+    <string name="city_t">Город: </string>
+    <string name="views_t">Просмотры: </string>
+    <string name="rating_t">Рейтинг: </string>
 </resources>

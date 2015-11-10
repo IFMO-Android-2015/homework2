@@ -129,8 +129,7 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:id="@+id/viewsCount"
-                android:layout_marginLeft="10dp"
-                android:elegantTextHeight="false" />
+                android:layout_marginLeft="10dp" />
         </LinearLayout>
 
         <LinearLayout
