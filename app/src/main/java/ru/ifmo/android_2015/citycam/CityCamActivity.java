@@ -113,21 +113,34 @@ public class CityCamActivity extends AppCompatActivity {
             }
         }
 
-        private InputStream getStream(URL url) throws IOException {
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setReadTimeout(10000);
-            connection.setConnectTimeout(15000);
-            connection.setRequestMethod("GET");
-            connection.setDoInput(true);
-            connection.connect();
-            return connection.getInputStream();
-        }
-
         @Override
         protected Bitmap doInBackground(City... params) {
             try {
-                String link = parserJson(getStream(Webcams.createNearbyUrl(params[0].latitude, params[0].longitude)));
-                result = BitmapFactory.decodeStream(getStream(new URL(link)));
+                URL url = Webcams.createNearbyUrl(params[0].latitude, params[0].longitude);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.connect();
+                String link = "";
+                InputStream res;
+                try {
+                    res = connection.getInputStream();
+                    link = parserJson(res);
+                } catch (Exception e) {
+                    throw e;
+                } finally {
+                    connection.disconnect();
+                }
+                url = new URL(link);
+                Log.d(TAG, url.toString());
+                connection = (HttpURLConnection) url.openConnection();
+                connection.connect();
+                try {
+                    res = connection.getInputStream();
+                    result = BitmapFactory.decodeStream(res);
+                } catch (Exception e) {
+                    throw e;
+                } finally {
+                    connection.disconnect();
+                }
                 bitmap = result;
                 return result;
             } catch (IOException e) {
@@ -153,36 +166,68 @@ public class CityCamActivity extends AppCompatActivity {
         public String parserJson(InputStream in) throws IOException {
             JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
             reader.beginObject();
-            Log.d(TAG, reader.nextName());
-            Log.d(TAG, reader.nextString());
-            Log.d(TAG, reader.nextName());
-            reader.beginObject();
-            String lastOne = "";
-            try{
-                for (int i = 0; i < 3; i++) {
-                    while (reader.hasNext()) {
-                        String name = reader.nextName();
-                        Log.d(TAG, name);
-                        if (name.equals("webcam")) {
-                            reader.beginArray();
-                            reader.beginObject();
-                        } else {
-                            if (name.equals("timelapse") || name.equals("categories")) {
-                                reader.beginObject();
-                            } else {
-                                lastOne = reader.nextString();
-                                Log.d(TAG, lastOne);
-                            }
-                        }
-                    }
-                    if (i != 2) {
-                        reader.endObject();
-                    }
-                }
-            } catch (Exception e){
-              throw e;
+            try {
+                return jsonObject(reader);
+            } catch (Exception e) {
+                throw e;
             } finally {
                 reader.close();
+            }
+        }
+
+        String jsonObject(JsonReader reader) throws IOException {
+            String lastOne = "";
+            while (reader.hasNext()) {
+                String name = reader.nextName();
+                Log.d(TAG, name);
+                switch (name) {
+                    case "webcams": {
+                        reader.beginObject();
+                        lastOne = jsonObject(reader);
+                        if (!lastOne.equals("")) {
+                            return lastOne;
+                        }
+                        reader.endObject();
+                        break;
+                    }
+                    case "webcam": {
+                        reader.beginArray();
+                        reader.beginObject();
+                        lastOne = jsonObject(reader);
+                        if (!lastOne.equals("")) {
+                            return lastOne;
+                        }
+                        reader.endObject();
+                        reader.endArray();
+                        break;
+                    }
+                    case "timelapse": {
+                        reader.beginObject();
+                        lastOne = jsonObject(reader);
+                        if (!lastOne.equals("")) {
+                            return lastOne;
+                        }
+                        reader.endObject();
+                        break;
+                    }
+                    case "categories": {
+                        reader.beginObject();
+                        lastOne = jsonObject(reader);
+                        if (!lastOne.equals("")) {
+                            return lastOne;
+                        }
+                        reader.endObject();
+                        break;
+                    }
+                    case "daylight_preview_url": {
+                        lastOne = reader.nextString();
+                        return lastOne;
+                    }
+                    default: {
+                        reader.nextString();
+                        break;
+                    }
+                }
             }
             return lastOne;
         }
