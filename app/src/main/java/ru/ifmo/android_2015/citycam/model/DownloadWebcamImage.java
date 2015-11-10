@@ -120,7 +120,7 @@ public class DownloadWebcamImage extends AsyncTask<City, Void, Webcam> {
         try {
             reader.beginObject();
             switch (reader.nextName()) {
-                case "webcams": parseWebcams(reader); break;
+                case "webcams": webcams = parseWebcams(reader); break;
                 default: skipValue(); break;
             }
             reader.endObject();
