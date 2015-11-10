@@ -25,6 +25,16 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             style="@android:style/Widget.Holo.Light.ProgressBar.Large.Inverse"/>
+
+        <TextView
+            android:id="@+id/error_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="24dp"
+            android:text="" />
+
     </FrameLayout>
 
     <!-- Добавьте сюда еще View с информацией о выбранном городе и показанной веб-камеры -->
