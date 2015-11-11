@@ -18,7 +18,7 @@
             android:layout_width="320dp"
             android:layout_height="200dp"
             android:scaleType="centerCrop"
-            android:background="#999"/>
+            android:background="#999" />
 
         <ProgressBar
             android:id="@+id/progress"
@@ -41,10 +41,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="Архангельск"
             android:id="@+id/title"
-            android:textSize="30dp"
-            android:layout_marginLeft="25dp"
-            android:layout_marginRight="25dp" />
+            android:textSize="30dp" />
     </LinearLayout>
     <!-- Добавьте сюда еще View с информацией о выбранном городе и показанной веб-камеры -->
 
