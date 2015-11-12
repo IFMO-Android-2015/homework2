@@ -41,6 +41,36 @@ public class CityCamActivity extends AppCompatActivity {
     private ProgressBar progressView;
     private DownloadJsonTask downloadTask;
     private TextView titleTextView;
+    private CamData cameraData;
+
+    class CamData {
+        Bitmap image;
+        String title;
+    }
+
+    class SavedData {
+        CamData webcam;
+        DownloadJsonTask task;
+    }
+
+    void updateUI(CamData data) {
+        progressView.setVisibility(View.INVISIBLE);
+        if(data.image != null) {
+            camImageView.setImageBitmap(data.image);
+            titleTextView.setText(data.title);
+        } else {
+            titleTextView.setText("No data for this cam");
+        }
+    }
+
+    @Override
+    public SavedData onRetainCustomNonConfigurationInstance() {
+        SavedData data = new SavedData();
+        data.task = this.downloadTask;
+        data.webcam = this.cameraData;
+        return data;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,11 +91,16 @@ public class CityCamActivity extends AppCompatActivity {
         progressView.setVisibility(View.VISIBLE);
 
         if (savedInstanceState != null) {
-            downloadTask = (DownloadJsonTask) getLastNonConfigurationInstance();
+            SavedData loaded = (SavedData)getLastCustomNonConfigurationInstance();
+            downloadTask = loaded.task;
+            cameraData = loaded.webcam;
+            updateUI(cameraData);
         }
         if (downloadTask == null) {
             downloadTask = new DownloadJsonTask(this);
             downloadTask.execute();
+        } else {
+            downloadTask.attachActivity(this);
         }
     }
     enum DownloadState {
@@ -81,19 +116,23 @@ public class CityCamActivity extends AppCompatActivity {
         }
     }
 
-    private class DownloadJsonTask extends AsyncTask<Void, Integer, DownloadState> {
+    private static class DownloadJsonTask extends AsyncTask<Void, Integer, DownloadState> {
 
-        private Context appContext;
         private DownloadState state = DownloadState.DOWNLOADING;
+        private CityCamActivity activity;
 
         DownloadJsonTask(CityCamActivity activity) {
-            this.appContext = activity.getApplicationContext();
+            this.activity = activity;
+        }
+
+        void attachActivity(CityCamActivity activity) {
+            this.activity = activity;
         }
 
         @Override
         protected DownloadState doInBackground(Void... voids) {
             try {
-                downloadFile(appContext);
+                this.activity.downloadFile(this.activity.getApplicationContext());
                 state = DownloadState.DONE;
 
             } catch (Exception e) {
@@ -169,20 +208,20 @@ public class CityCamActivity extends AppCompatActivity {
                 inputStreamReader.close();
         }
         if(imageUrl != null) {
-            Log.d("IMAGE URL", imageUrl);
             File previewFile = FileUtils.createTempExternalFile(context, ".jpg");
             DownloadUtils.downloadFile(imageUrl, previewFile);
             InputStream bitmapInputStream;
             try {
                 bitmapInputStream = new FileInputStream(previewFile);
                 final Bitmap bitmap = BitmapFactory.decodeStream(bitmapInputStream);
-                final String finalTitle = title;
+                final CamData data = new CamData();
+                data.image = bitmap;
+                data.title = title;
+                this.cameraData = data;
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        camImageView.setImageBitmap(bitmap);
-                        progressView.setVisibility(View.INVISIBLE);
-                        titleTextView.setText(finalTitle);
+                        updateUI(data);
                     }
                 });
             } catch (Exception e) {
@@ -191,6 +230,17 @@ public class CityCamActivity extends AppCompatActivity {
             }
         } else {
             Log.e("Parsing", "No webcams in this location.");
+        }
+        //Что-то не получилось, пишем что не нашли камеры
+        if(this.cameraData == null) {
+            final CamData data = new CamData();
+            this.cameraData = data;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    updateUI(data);
+                }
+            });
         }
     }
 
