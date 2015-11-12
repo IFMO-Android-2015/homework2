@@ -10,7 +10,7 @@ import android.util.Log;
 
 import ru.ifmo.android_2015.citycam.list.CitiesRecyclerAdapter;
 import ru.ifmo.android_2015.citycam.list.CitySelectedListener;
-import ru.ifmo.android_2015.citycam.list.RecylcerDividersDecorator;
+import ru.ifmo.android_2015.citycam.list.RecyclerDividersDecorator;
 import ru.ifmo.android_2015.citycam.model.City;
 
 public class SelectCityActivity extends AppCompatActivity
@@ -25,7 +25,7 @@ public class SelectCityActivity extends AppCompatActivity
         setContentView(R.layout.activity_select_city);
         recyclerView = (RecyclerView) findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.addItemDecoration(new RecylcerDividersDecorator(Color.DKGRAY));
+        recyclerView.addItemDecoration(new RecyclerDividersDecorator(Color.DKGRAY));
         CitiesRecyclerAdapter adapter = new CitiesRecyclerAdapter(this);
         adapter.setCitySelectedListener(this);
         recyclerView.setAdapter(adapter);

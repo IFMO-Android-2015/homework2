@@ -1,11 +1,13 @@
 package ru.ifmo.android_2015.citycam;
 
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import ru.ifmo.android_2015.citycam.model.City;
 
@@ -20,10 +22,11 @@ public class CityCamActivity extends AppCompatActivity {
      */
     public static final String EXTRA_CITY = "city";
 
-    private City city;
+    City city;
 
-    private ImageView camImageView;
-    private ProgressBar progressView;
+    ImageView camImageView;
+    ProgressBar progressView;
+    TextView camNameView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,14 +41,31 @@ public class CityCamActivity extends AppCompatActivity {
         setContentView(R.layout.activity_city_cam);
         camImageView = (ImageView) findViewById(R.id.cam_image);
         progressView = (ProgressBar) findViewById(R.id.progress);
+        camNameView = (TextView) findViewById(R.id.cam_name);
 
-        getSupportActionBar().setTitle(city.name);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(city.name);
+        }
 
+        camImageView.setVisibility(View.INVISIBLE);
         progressView.setVisibility(View.VISIBLE);
+        camNameView.setVisibility(View.INVISIBLE);
 
         // Здесь должен быть код, инициирующий асинхронную загрузку изображения с веб-камеры
         // в выбранном городе.
+        new DownloadTask(this).execute();
     }
 
-    private static final String TAG = "CityCam";
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
+    static final String TAG = "CityCam";
 }
