@@ -107,9 +107,9 @@ public class CityCamActivity extends AppCompatActivity {
     void downloadFile(Context context) throws IOException {
         File destFile = FileUtils.createTempExternalFile(context, ".json");
         DownloadUtils.downloadFile(Webcams.createNearbyUrl(this.city.latitude, this.city.longitude).toString(), destFile);
-        InputStreamReader inputStreamReader;
-        BufferedReader bufferedReader;
-        JsonReader jsonReader;
+        InputStreamReader inputStreamReader = null;
+        BufferedReader bufferedReader = null;
+        JsonReader jsonReader = null;
         String imageUrl = null;
         String title = null;
         try {
@@ -159,6 +159,14 @@ public class CityCamActivity extends AppCompatActivity {
         catch (Exception e) {
             e.printStackTrace();
             Log.e("Parsing", "Cant parse json.");
+        }
+        finally {
+            if(bufferedReader != null)
+                bufferedReader.close();
+            if(jsonReader != null)
+                jsonReader.close();
+            if(inputStreamReader != null)
+                inputStreamReader.close();
         }
         if(imageUrl != null) {
             Log.d("IMAGE URL", imageUrl);
