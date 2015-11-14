@@ -4,6 +4,8 @@ package ru.ifmo.android_2015.citycam;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.util.JsonReader;
+import android.util.JsonToken;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -17,6 +19,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Random;
 
 import ru.ifmo.android_2015.citycam.model.City;
@@ -62,45 +65,75 @@ public class GetCamInfo extends AsyncTask<City, Void, Integer> {
     private void getInfo(City city) throws Exception {
         HttpURLConnection url = null;
         InputStreamReader in = null;
+        JsonReader jsonReader = null;
         Log.i(TAG, "Getting info");
         Webcam ans = null;
 
         try {
             url = (HttpURLConnection) Webcams.createNearbyUrl(city.latitude, city.longitude).openConnection();
             in = new InputStreamReader(url.getInputStream());
-
+            jsonReader = new JsonReader(in);
             if (url.getResponseCode() != 200) {
                 Log.e(TAG, "Bad response from server:" + url.getResponseCode());
                 throw new IOException("Bad response from server:" + url.getResponseCode());
             }
+            double rating = 0;
+            ArrayList<Webcams> cams = new ArrayList<>();
+            String previewURL ="";
+            String timezone = "";
+            String title = "";
+            double timeOffset = 0;
+            int count = 0;
+            while (jsonReader.hasNext()){
+                if (jsonReader.peek() == JsonToken.BEGIN_OBJECT) {
+                    jsonReader.beginObject();
+                }
+                String name = jsonReader.nextName();
+                switch (name) {
+                    case "status":
+                        String status = jsonReader.nextString();
+                        if (!status.equals("ok")) {
 
-            BufferedReader bufferedReader = new BufferedReader(in);
-            StringBuilder stringBuilder = new StringBuilder();
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                stringBuilder.append(line).append("\n");
-            }
-            bufferedReader.close();
-
-            JSONObject response = new JSONObject(stringBuilder.toString());
-            JSONArray cams = response.getJSONObject("webcams").getJSONArray("webcam");
-            int count = cams.length();
-            Log.i(TAG, "Number of cams: " + count);
-
-            if (count != 0) {
-                Random random = new Random();
-                JSONObject cam;
-                cam = cams.getJSONObject(random.nextInt(count));
-                Log.i(TAG, "Setting camera:" + cam.toString());
-                String previewURL = cam.getString("preview_url");
-                String title = cam.getString("title");
-                String timezone = cam.getString("timezone");
-                double rate = cam.getDouble("rating_avg");
-                double offset = cam.getDouble("timezone_offset");
-                ans = new Webcam(downloadPreview(new URL(previewURL)), title, rate, timezone, offset);
-                activity.webcam = ans;
-            } else {
-                throw new IOException("No cams in the city " + city.name);
+                            Log.e(TAG, "Status not ok");
+                            throw new IOException("Request failed");
+                        }
+                        break;
+                    case "webcams":
+                        jsonReader.beginObject();
+                        break;
+                    case "count":
+                        count = jsonReader.nextInt();
+                        if (count == 0) {
+                           Log.e(TAG, "No cams");
+                            throw new Exception("No cams");
+                        }
+                        break;
+                    case "webcam":
+                        jsonReader.beginArray();
+                        break;
+                    case "timezone":
+                        timezone=jsonReader.nextString();
+                        break;
+                    case "timezone_offset":
+                        timeOffset=jsonReader.nextDouble();
+                        break;
+                    case "rating_avg":
+                        rating = jsonReader.nextDouble();
+                        break;
+                    case "preview_url":
+                        previewURL = jsonReader.nextString();
+                        break;
+                    case "title":
+                        title = jsonReader.nextString();
+                        break;
+                    default:
+                        jsonReader.skipValue();
+                        break;
+                }
+                if (jsonReader.peek() == JsonToken.END_OBJECT) {
+                    ans = new Webcam(downloadPreview(new URL(previewURL)), title, rating, timezone, timeOffset);
+                    activity.webcam = ans;
+                }
             }
 
         } catch (Exception e) {
