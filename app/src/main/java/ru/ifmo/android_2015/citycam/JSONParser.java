@@ -20,26 +20,21 @@ public class JSONParser {
 
         JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
 
-        reader.beginObject();
-        reader.nextName();
-        String status = reader.nextString();
-        if (!status.equals("ok")) {
-            Log.e(TAG, "Status isn't Ok");
-        }
-
         try {
-            if (reader.nextName().equals("webcams")) {
-                reader.beginObject();
-                reader.skipValue(); //skip "count"
-            }
-
-            if (reader.nextInt() == 0) {
-                Log.e(TAG, "No webcam in selected city");
-                return null;
-            }
-
-            for (int i = 0; i < 5; i++) {
-                reader.skipValue();
+            reader.beginObject();
+            while (reader.hasNext()) {
+                if (reader.peek() == JsonToken.BEGIN_OBJECT) {
+                    reader.beginObject();
+                    continue;
+                }
+                String name = reader.nextName();
+                if (name.equals("webcams")) {
+                    continue;
+                } else if (name.equals("webcam")) {
+                    break;
+                } else {
+                    reader.skipValue();
+                }
             }
 
             List<WebCam> webcams = new ArrayList<WebCam>();

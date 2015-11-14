@@ -107,12 +107,14 @@ public class CityCamActivity extends AppCompatActivity {
 
         @Override
         protected processState doInBackground(Void ... ignore) {
+            HttpURLConnection  urlConnection = null;
             try {
                 URL url = Webcams.createNearbyUrl(city.latitude, city.longitude);
-                HttpURLConnection  urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.connect();
+                InputStream in = null;
                 try {
-                    InputStream in = urlConnection.getInputStream();
+                    in = urlConnection.getInputStream();
                     List<WebCam> result = JSONParser.readJsonStream(in);
                     if (result != null && result.size() > 0) {
                         camera = result.get(0);
@@ -123,12 +125,16 @@ public class CityCamActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     Log.e(TAG, "Error of parsing");
                     state = processState.Error;
-                }  finally {
-                    urlConnection.disconnect();
+                } finally {
+                    in.close();
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Error of connection");
                 state = processState.Error;
+            }  finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
             }
             if (state == processState.Error) {
                 return state;
