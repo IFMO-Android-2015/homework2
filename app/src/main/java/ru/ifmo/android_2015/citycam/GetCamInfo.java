@@ -79,12 +79,12 @@ public class GetCamInfo extends AsyncTask<City, Void, Integer> {
             }
             double rating = 0;
             ArrayList<Webcams> cams = new ArrayList<>();
-            String previewURL ="";
+            String previewURL = "";
             String timezone = "";
             String title = "";
             double timeOffset = 0;
             int count = 0;
-            while (jsonReader.hasNext()){
+            while (jsonReader.hasNext()) {
                 if (jsonReader.peek() == JsonToken.BEGIN_OBJECT) {
                     jsonReader.beginObject();
                 }
@@ -104,7 +104,7 @@ public class GetCamInfo extends AsyncTask<City, Void, Integer> {
                     case "count":
                         count = jsonReader.nextInt();
                         if (count == 0) {
-                           Log.e(TAG, "No cams");
+                            Log.e(TAG, "No cams");
                             throw new Exception("No cams");
                         }
                         break;
@@ -112,10 +112,10 @@ public class GetCamInfo extends AsyncTask<City, Void, Integer> {
                         jsonReader.beginArray();
                         break;
                     case "timezone":
-                        timezone=jsonReader.nextString();
+                        timezone = jsonReader.nextString();
                         break;
                     case "timezone_offset":
-                        timeOffset=jsonReader.nextDouble();
+                        timeOffset = jsonReader.nextDouble();
                         break;
                     case "rating_avg":
                         rating = jsonReader.nextDouble();
