@@ -1,5 +1,6 @@
 package ru.ifmo.android_2015.citycam;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -28,6 +29,13 @@ public class CityCamActivity extends AppCompatActivity {
     ProgressBar progressView;
     TextView camNameView;
 
+    DownloadTask downloadTask;
+    Bitmap bitmap;
+
+    static final String IMAGE_BITMAP = "imageBitmap";
+    static final String NAME_STRING = "nameString";
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,23 +56,51 @@ public class CityCamActivity extends AppCompatActivity {
             actionBar.setTitle(city.name);
         }
 
-        camImageView.setVisibility(View.INVISIBLE);
-        progressView.setVisibility(View.VISIBLE);
-        camNameView.setVisibility(View.INVISIBLE);
+        if (savedInstanceState == null) {
+            camImageView.setVisibility(View.INVISIBLE);
+            progressView.setVisibility(View.VISIBLE);
+        }
 
         // Здесь должен быть код, инициирующий асинхронную загрузку изображения с веб-камеры
         // в выбранном городе.
-        new DownloadTask(this).execute();
+        if (savedInstanceState != null && getLastCustomNonConfigurationInstance() != null) {
+            downloadTask = (DownloadTask) getLastCustomNonConfigurationInstance();
+            downloadTask.attachActivity(this);
+        } else {
+            Log.d(TAG, "task created");
+            downloadTask = new DownloadTask(this);
+            downloadTask.execute();
+        }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
+        outState.putParcelable(IMAGE_BITMAP, bitmap);
+        outState.putCharSequence(NAME_STRING, camNameView.getText());
+
         super.onSaveInstanceState(outState);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
+
+        bitmap = savedInstanceState.getParcelable(IMAGE_BITMAP);
+        if (bitmap != null) {
+            camImageView.setImageBitmap(bitmap);
+            camImageView.setVisibility(View.VISIBLE);
+            progressView.setVisibility(View.INVISIBLE);
+        } else {
+            camImageView.setVisibility(View.INVISIBLE);
+            progressView.setVisibility(View.VISIBLE);
+        }
+
+        camNameView.setText(savedInstanceState.getCharSequence(NAME_STRING));
+    }
+
+    @Override
+    public Object onRetainCustomNonConfigurationInstance() {
+        return downloadTask;
     }
 
     static final String TAG = "CityCam";

@@ -18,14 +18,12 @@ import ru.ifmo.android_2015.citycam.webcams.Webcams;
  */
 public class DownloadTask extends AsyncTask<Void, String, Bitmap> {
     CityCamActivity activity;
-    String string;
-    Bitmap bitmap;
 
     public DownloadTask(CityCamActivity activity) {
         this.activity = activity;
     }
 
-    public void changeActivity(CityCamActivity activity) {
+    public void attachActivity(CityCamActivity activity) {
         this.activity = activity;
     }
 
@@ -106,7 +104,6 @@ public class DownloadTask extends AsyncTask<Void, String, Bitmap> {
     protected void onProgressUpdate(String... values) {
         super.onProgressUpdate(values);
         Log.d(CityCamActivity.TAG, "Showing camera name...");
-        activity.camNameView.setVisibility(View.VISIBLE);
         activity.camNameView.setText(values[0]);
     }
 
@@ -118,13 +115,13 @@ public class DownloadTask extends AsyncTask<Void, String, Bitmap> {
 
         if (bitmap == null) {
             Log.d(CityCamActivity.TAG, "Download unsuccessful");
-            activity.camNameView.setVisibility(View.VISIBLE);
             activity.camNameView.setText(R.string.download_error);
         } else {
             Log.d(CityCamActivity.TAG, "Download successful");
             activity.progressView.setVisibility(View.INVISIBLE);
             activity.camImageView.setVisibility(View.VISIBLE);
             activity.camImageView.setImageBitmap(bitmap);
+            activity.bitmap = bitmap;
         }
     }
 }
