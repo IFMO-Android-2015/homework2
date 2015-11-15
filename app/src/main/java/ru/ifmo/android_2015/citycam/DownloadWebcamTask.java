@@ -69,7 +69,6 @@ public class DownloadWebcamTask extends AsyncTask<Void, Void, Integer> {
             int timestamp = 0;
 
             JsonReader reader = new JsonReader(new StringReader(response));
-            Log.w(TAG, response);
 
             reader.beginObject();
             while (!reader.nextName().equals("webcams")) {
