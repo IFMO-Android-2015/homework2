@@ -2,9 +2,6 @@ package ru.ifmo.android_2015.citycam;
 
 import android.graphics.Bitmap;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
@@ -26,10 +23,10 @@ public class Webcam {
         this.previewURL = null;
     }
 
-    public Webcam(JSONObject object) throws JSONException, MalformedURLException {
-        this.title = object.getString("title");
-        this.lastUpdate = new Date(object.getLong("last_update") * 1000);
-        this.previewURL = new URL(object.getString("preview_url"));
+    public Webcam(String title, Long lastUpdate, String previewURL) throws MalformedURLException {
+        this.title = title;
+        this.lastUpdate = new Date(lastUpdate * 1000);
+        this.previewURL = new URL(previewURL);
     }
 
     public void attachImage(Bitmap bitmap) {

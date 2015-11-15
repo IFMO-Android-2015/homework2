@@ -3,18 +3,16 @@ package ru.ifmo.android_2015.citycam;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.util.JsonReader;
 import android.util.Log;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import ru.ifmo.android_2015.citycam.model.City;
@@ -39,6 +37,37 @@ public class GetWebcamView extends AsyncTask<City, Webcam, Webcam> {
         this.activity = activity;
     }
 
+    private List<Webcam> readArray(JsonReader reader) throws IOException {
+        String title = null;
+        Long lastUpdate = null;
+        String previewURL = null;
+        ArrayList<Webcam> result = new ArrayList<>();
+        reader.beginArray();
+        while (reader.hasNext()) {
+            reader.beginObject();
+            while (reader.hasNext()) {
+                String name = reader.nextName();
+                switch (name) {
+                    case "title":
+                        title = reader.nextString();
+                        break;
+                    case "last_update":
+                        lastUpdate = reader.nextLong();
+                        break;
+                    case "preview_url":
+                        previewURL = reader.nextString();
+                        break;
+                    default:
+                        reader.skipValue();
+                }
+            }
+            reader.endObject();
+            result.add(new Webcam(title, lastUpdate, previewURL));
+        }
+        reader.endArray();
+        return result;
+    }
+
     @Override
     protected Webcam doInBackground(City... params) {
         Webcam result = new Webcam();
@@ -49,16 +78,38 @@ public class GetWebcamView extends AsyncTask<City, Webcam, Webcam> {
             URL webcamsUrl = Webcams.createNearbyUrl(city.latitude, city.longitude);
             con = (HttpURLConnection) webcamsUrl.openConnection();
             input = con.getInputStream();
-            JSONObject parsedJSON = new JSONObject(new BufferedReader(new InputStreamReader(input)).readLine()); //HERE
-            if (!parsedJSON.getString("status").equals("ok")) {
-                throw new Exception("Request Failed");
-            }
-            parsedJSON = parsedJSON.getJSONObject("webcams");
-            JSONArray webcamsArray = parsedJSON.getJSONArray("webcam");
+            JsonReader reader = new JsonReader(new InputStreamReader(input, "UTF-8"));
             ArrayList<Webcam> webcams = new ArrayList<>();
-            for (int i = 0; i < webcamsArray.length(); i++) {
-                webcams.add(new Webcam(webcamsArray.getJSONObject(i)));
+
+            reader.beginObject();
+            while (reader.hasNext()) {
+                String name = reader.nextName();
+                switch (name) {
+                    case "status":
+                        String message = reader.nextString();
+                        if (message.equals("fail")) {
+                            throw new Exception("Request Failed");
+                        }
+                        break;
+                    case "webcams":
+                        reader.beginObject();
+                        while (reader.hasNext()) {
+                            String inner_name = reader.nextName();
+                            if (inner_name.equals("webcam")) {
+                                webcams = (ArrayList<Webcam>)readArray(reader);
+                            } else {
+                                reader.skipValue();
+                            }
+                        }
+                        reader.endObject();
+                        break;
+                    default:
+                        reader.skipValue();
+
+                }
             }
+            reader.endObject();
+
             if (webcams.size() == 0) {
                 result.attachImage(null);
             } else {
