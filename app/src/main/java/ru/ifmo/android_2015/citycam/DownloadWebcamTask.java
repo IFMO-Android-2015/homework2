@@ -1,6 +1,8 @@
 package ru.ifmo.android_2015.citycam;
 
 import android.os.AsyncTask;
+import android.util.JsonReader;
+import android.util.JsonToken;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -10,6 +12,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -55,19 +58,52 @@ public class DownloadWebcamTask extends AsyncTask<Void, Void, Integer> {
         try {
             cityURL = Webcams.createNearbyUrl(activity.city.latitude, activity.city.longitude);
 
-            JSONObject response = getJSONResponse(cityURL);
-            JSONArray webcams;
-            if (response != null) {
-                webcams = response.getJSONObject("webcams").getJSONArray("webcam");
-            } else {
-                Log.w(TAG, "Incorrect JSON response.");
+            String response = getJSONResponse(cityURL);
+            if (response == null) {
+                Log.e(TAG, "Error while getting response!");
                 return 0;
             }
 
-            String previewURL = webcams.getJSONObject(0).getString("preview_url");
-            String title = webcams.getJSONObject(0).getString("title");
-            int timestamp = Integer.parseInt(webcams.getJSONObject(0).getString("last_update"));
+            String previewURL = "";
+            String title = "";
+            int timestamp = 0;
 
+            JsonReader reader = new JsonReader(new StringReader(response));
+            Log.w(TAG, response);
+
+            reader.beginObject();
+            while (!reader.nextName().equals("webcams")) {
+                reader.skipValue();
+            }
+
+            reader.beginObject();
+            while (reader.hasNext()) {
+                if (reader.nextName().equals("webcam")) {
+                    break;
+                } else {
+                    reader.skipValue();
+                }
+            }
+
+            reader.beginArray();
+            if (reader.hasNext()) {
+                reader.beginObject();
+                while (reader.hasNext()) {
+                    String nextName = reader.nextName();
+                    if (nextName.equals("title")) {
+                        title = reader.nextString();
+                    } else if (nextName.equals("preview_url")) {
+                        previewURL = reader.nextString();
+                    } else if (nextName.equals("last_update")) {
+                        timestamp = Integer.parseInt(reader.nextString());
+                    } else {
+                        reader.skipValue();
+                    }
+                }
+                reader.endObject();
+            }
+            reader.close();
+            
             activity.camera = new Webcam(title, timestamp, new URL(previewURL));
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
@@ -77,7 +113,7 @@ public class DownloadWebcamTask extends AsyncTask<Void, Void, Integer> {
         return activity.camera.updatePreview() ? 1 : 0;
     }
 
-    private JSONObject getJSONResponse(URL url) {
+    private String getJSONResponse(URL url) {
         HttpURLConnection urlConnection = null;
         try {
             urlConnection = (HttpURLConnection) url.openConnection();
@@ -90,7 +126,7 @@ public class DownloadWebcamTask extends AsyncTask<Void, Void, Integer> {
                     sb.append(line).append("\n");
                 }
                 br.close();
-                return new JSONObject(sb.toString());
+                return sb.toString();
             }
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
