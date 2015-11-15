@@ -6,8 +6,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import ru.ifmo.android_2015.citycam.model.City;
+import ru.ifmo.android_2015.citycam.model.Webcam;
 
 /**
  * Экран, показывающий веб-камеру одного выбранного города.
@@ -23,7 +25,12 @@ public class CityCamActivity extends AppCompatActivity {
     private City city;
 
     private ImageView camImageView;
-    private ProgressBar progressView;
+    private TextView title;
+    private TextView info;
+    private GetCamInfo getCamInfo;
+
+    public ProgressBar progressView;
+    public Webcam webcam;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +45,8 @@ public class CityCamActivity extends AppCompatActivity {
         setContentView(R.layout.activity_city_cam);
         camImageView = (ImageView) findViewById(R.id.cam_image);
         progressView = (ProgressBar) findViewById(R.id.progress);
+        title = (TextView) findViewById(R.id.textTitle);
+        info = (TextView) findViewById(R.id.textInfo);
 
         getSupportActionBar().setTitle(city.name);
 
@@ -45,6 +54,51 @@ public class CityCamActivity extends AppCompatActivity {
 
         // Здесь должен быть код, инициирующий асинхронную загрузку изображения с веб-камеры
         // в выбранном городе.
+
+        if (savedInstanceState != null) {
+            getCamInfo = (GetCamInfo) getLastCustomNonConfigurationInstance();
+        }
+        if (getCamInfo == null) {
+            getCamInfo = new GetCamInfo(this);
+            getCamInfo.execute(city);
+        } else {
+            getCamInfo.attachActivity(this);
+        }
+    }
+
+    @Override
+    public Object onRetainCustomNonConfigurationInstance() {
+        return getCamInfo;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        webcam = (Webcam) savedInstanceState.get("camera");
+        if (webcam != null) {
+            showWebcam();
+        } else {
+            showEmpty();
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable("camera", webcam);
+    }
+
+    public void showEmpty() {
+        camImageView.setImageResource(R.drawable.error1);
+        title.setText("Нет камер");
+        info.setText("Нет информации о камере");
+    }
+
+    public void showWebcam() {
+        camImageView.setImageBitmap(webcam.getPreview());
+        title.setText(webcam.getTitle());
+        String inf = "Рейтинг: "+webcam.getRating() + "\nTimezone: " + webcam.getTimezone() + "\nGMT: " + webcam.getTimeOffset();
+        info.setText(inf);
     }
 
     private static final String TAG = "CityCam";
