@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import ru.ifmo.android_2015.citycam.R;
 import ru.ifmo.android_2015.citycam.model.City;
 import ru.ifmo.android_2015.citycam.model.LargeRussianCities;

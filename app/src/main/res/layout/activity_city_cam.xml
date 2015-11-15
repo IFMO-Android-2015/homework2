@@ -3,13 +3,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#fff">
+    android:background="@color/backgroundColor">
 
     <FrameLayout
+        android:id="@+id/frame_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="5dp"
         android:layout_centerHorizontal="true">
 
         <ImageView
@@ -24,9 +25,32 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            style="@android:style/Widget.Holo.Light.ProgressBar.Large.Inverse"/>
+            style="@android:style/Widget.Holo.Light.ProgressBar.Large.Inverse"
+            android:indeterminate="false" />
     </FrameLayout>
 
-    <!-- Добавьте сюда еще View с информацией о выбранном городе и показанной веб-камеры -->
 
+    <TextView
+        android:id="@+id/title_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/fetching_data"
+        android:layout_below="@id/frame_layout"
+        android:textSize="15sp"
+        android:layout_margin="5dp"
+        android:layout_centerHorizontal="true" />
+
+
+    <TextView
+        android:id="@+id/last_update_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/last_update"
+        android:layout_below="@id/title_label"
+        android:visibility="invisible"
+        android:textSize="15sp"
+        android:layout_margin="5dp"
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>
