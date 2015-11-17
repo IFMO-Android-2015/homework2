@@ -12,7 +12,7 @@ public final class Webcams {
 
     // Зарегистрируйтесь на http://ru.webcams.travel/developers/
     // и вставьте сюда ваш devid
-    private static final String DEV_ID = "Ваш devid";
+    private static final String DEV_ID = "c162451bfc124c9463d0a5e03d5456ab";
 
     private static final String BASE_URL = "http://api.webcams.travel/rest";
 
@@ -39,7 +39,8 @@ public final class Webcams {
                 .appendQueryParameter(PARAM_DEVID, DEV_ID)
                 .appendQueryParameter(PARAM_FORMAT, FORMAT_JSON)
                 .build();
-        return new URL(uri.toString());
+        String s = uri.toString();
+        return new URL(s);
     }
 
     private Webcams() {}
