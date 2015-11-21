@@ -35,14 +35,14 @@ public class CityCamActivity extends AppCompatActivity {
     public static final String EXTRA_CITY = "city";
 
     private static City city;
-    private static ImageView camImageView;
-    private static ProgressBar progressView;
-    private static DownloadFileTask downloadTask;
-    private static TextView camTitle;
-    private static TextView camURL;
-    private static TextView camLatitude;
-    private static TextView camLongitude;
-    private static TextView camLocation;
+    private ImageView camImageView;
+    private ProgressBar progressView;
+    private DownloadFileTask downloadTask;
+    private TextView camTitle;
+    private TextView camURL;
+    private TextView camLatitude;
+    private TextView camLongitude;
+    private TextView camLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -164,11 +164,11 @@ public class CityCamActivity extends AppCompatActivity {
         protected void onPostExecute(processState state) {
             this.state = state;
             if (state == processState.Done) {
-                progressView.setVisibility(View.INVISIBLE);
+                activity.progressView.setVisibility(View.INVISIBLE);
                 updateView();
             }
             if (state == processState.Error) {
-                progressView.setVisibility(View.INVISIBLE);
+                activity.progressView.setVisibility(View.INVISIBLE);
                 Toast.makeText(activity, "In selected city isn't camera", (Toast.LENGTH_LONG)).show();
                 Log.e(TAG, "In selected city isn't camera");
             }
@@ -176,13 +176,15 @@ public class CityCamActivity extends AppCompatActivity {
 
         void updateView() {
             if (state == processState.Done && image != null) {
-                camImageView.setImageBitmap(image);
-                camTitle.setText("Camera title is " + camera.getTitle());
-                camLocation.setText("Camera location is " + camera.getLocation());
-                camURL.setText("Camera url is " + camera.getURL());
-                camLatitude.setText("Camera latitude is " + camera.getLatitude().toString());
-                camLongitude.setText("Camera longitude is " + camera.getLongitude().toString());
-            } else {
+                activity.progressView.setVisibility(View.INVISIBLE);
+                activity.camImageView.setImageBitmap(image);
+                activity.camTitle.setText("Camera title is " + camera.getTitle());
+                activity.camLocation.setText("Camera location is " + camera.getLocation());
+                activity.camURL.setText("Camera url is " + camera.getURL());
+                activity.camLatitude.setText("Camera latitude is " + camera.getLatitude().toString());
+                activity.camLongitude.setText("Camera longitude is " + camera.getLongitude().toString());
+            } else if (state == processState.Error) {
+                activity.progressView.setVisibility(View.INVISIBLE);
                 Log.e(TAG, "Image is null");
             }
         }
