@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">City Cam</string>
+    <string name="webcam_title">Webcam name:</string>
+    <string name="webcam_view_count">View count:</string>
 </resources>
