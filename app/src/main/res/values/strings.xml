@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">City Cam</string>
+    <string name="downloading">Идет загрузка</string>
+    <string name="done">Готово</string>
+    <string name="error">Ошибка</string>
+    <string name="no_cameras">Нет камер в выбранном городе</string>
+    <string name="sorry">Что-то пошло не так. Нам очень жаль.</string>
 </resources>

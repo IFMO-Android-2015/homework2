@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="#cbdcbf01">
+
+    <FrameLayout
+        android:id="@+id/cam_frame"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true">
+
+        <ImageView
+            android:id="@+id/cam_image"
+            android:layout_marginLeft="5dp"
+            android:layout_width="360dp"
+            android:layout_height="230dp"
+            android:background="#f8e18a"/>
+
+        <ProgressBar
+            android:id="@+id/progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            style="@android:style/Widget.Holo.Light.ProgressBar.Large.Inverse"/>
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginLeft="370dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/cam_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Название камеры: "
+            android:textColor="#000000"
+            android:textSize="25dp"
+            android:layout_weight="1"
+            android:gravity="center" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/cam_title"
+            android:textSize="20dp"
+            android:layout_weight="1"
+            android:gravity="center" />
+
+
+        <TextView
+            android:layout_marginLeft="5dp"
+            android:id="@+id/latitude_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Широта:"
+            android:textColor="#000000"
+            android:textSize="25dp"
+            android:layout_weight="1"
+            android:gravity="center" />
+
+        <TextView
+            android:layout_marginLeft="10dp"
+            android:id="@+id/latitude"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20dp"
+            android:layout_weight="1"
+            android:gravity="center" />
+
+        <TextView
+            android:layout_marginLeft="5dp"
+            android:id="@+id/longitude_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Долгота:"
+            android:textColor="#000000"
+            android:textSize="25dp"
+            android:layout_weight="1"
+            android:gravity="center" />
+
+        <TextView
+            android:layout_marginLeft="10dp"
+            android:id="@+id/longitude"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20dp"
+            android:layout_weight="1"
+            android:gravity="center" />
+    </LinearLayout>
+</RelativeLayout>
