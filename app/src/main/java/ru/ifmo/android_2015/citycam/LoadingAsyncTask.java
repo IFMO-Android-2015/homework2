@@ -26,11 +26,11 @@ public class LoadingAsyncTask extends AsyncTask<City, CamInfo, CamInfo> {
     private static final String LOGTAG = "Downloading";
     private Activity activity;
     private DownloadState state;
-    final ImageView view;
-    final TextView title;
-    final TextView lat;
-    final TextView lon;
-    final ProgressBar pr;
+    ImageView view;
+    TextView title;
+    TextView lat;
+    TextView lon;
+    ProgressBar pr;
 
     public DownloadState getState() {
         return state;
@@ -67,9 +67,9 @@ public class LoadingAsyncTask extends AsyncTask<City, CamInfo, CamInfo> {
     private void updateView(Activity activity) {
         if (activity != null) {
             if (state == DownloadState.DOWNLOADING) {
-                pr.setVisibility(View.VISIBLE);
+                activity.findViewById(R.id.progress).setVisibility(View.VISIBLE);
             } else {
-                pr.setVisibility(View.INVISIBLE);
+                activity.findViewById(R.id.progress).setVisibility(View.INVISIBLE);
             }
         }
     }
@@ -100,6 +100,11 @@ public class LoadingAsyncTask extends AsyncTask<City, CamInfo, CamInfo> {
 
     @Override
     protected void onPostExecute(CamInfo webcam) {
+        view = (ImageView) activity.findViewById(R.id.cam_image);
+        title = (TextView) activity.findViewById(R.id.cam_title);
+        lat = (TextView) activity.findViewById(R.id.latitude);
+        lon = (TextView) activity.findViewById(R.id.longitude);
+        pr  = (ProgressBar) activity.findViewById(R.id.progress);
         pr.setVisibility(View.INVISIBLE);
         if (webcam == null || state == DownloadState.NOCAMS) {
             view.setImageResource(R.drawable.nocam);
@@ -193,12 +198,24 @@ public class LoadingAsyncTask extends AsyncTask<City, CamInfo, CamInfo> {
     }
 
     private Bitmap getBitmap(CamInfo camInfo) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) (new URL(camInfo.getPreviewUrl())).openConnection();
-        InputStream is = connection.getInputStream();
-
-        Bitmap bitmap = BitmapFactory.decodeStream(is);
-        is.close();
-        connection.disconnect();
-        return bitmap;
+        HttpURLConnection connection = null;
+        InputStream is = null;
+        Bitmap bitmap = null;
+        try {
+            connection = (HttpURLConnection) (new URL(camInfo.getPreviewUrl())).openConnection();
+            is = connection.getInputStream();
+//            Log.w("asdf", (new URL(camInfo.getPreviewUrl())).toString());
+            bitmap = BitmapFactory.decodeStream(is);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+        return  bitmap;
     }
 }
