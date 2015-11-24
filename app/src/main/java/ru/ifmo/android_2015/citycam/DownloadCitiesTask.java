@@ -46,8 +46,6 @@ public class DownloadCitiesTask extends AsyncTask<City, WebcamInfo, Bitmap> {
             view = (ImageView) cityCamActivity.findViewById(R.id.cam_image);
             view.setVisibility(View.VISIBLE);
             view.setImageBitmap(bitmap);
-        } else if (error) {
-            textView.setText(message.toString());
         } else {
             publishProgress(webcam);
         }
