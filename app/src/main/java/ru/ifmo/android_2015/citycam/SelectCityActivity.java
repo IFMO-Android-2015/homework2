@@ -2,6 +2,7 @@ package ru.ifmo.android_2015.citycam;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -41,5 +42,4 @@ public class SelectCityActivity extends AppCompatActivity
     }
 
     private static final String TAG = "SelectCity";
-
 }
