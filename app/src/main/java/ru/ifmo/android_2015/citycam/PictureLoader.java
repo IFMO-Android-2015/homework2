@@ -45,9 +45,7 @@ class PictureLoader extends AsyncTask<Void, Integer, Bitmap> {
                 if (ss.equals("webcams")) {
                     reader.beginObject();
                 } else {
-
                     reader.skipValue();
-
                 }
                 ss = reader.nextName();
             }
@@ -55,13 +53,20 @@ class PictureLoader extends AsyncTask<Void, Integer, Bitmap> {
             String imgUrl = "";
             reader.beginArray();
             reader.beginObject();
-            for (String s = reader.nextName(); !s.equals("daylight_icon_url"); s = reader.nextName()) {
-                if (s.equals("title")) {
-                    title = reader.nextString();
-                } else if (s.equals("preview_url")) {
-                    imgUrl = reader.nextString();
-                } else {
-                    reader.skipValue();
+            while (reader.hasNext()) {
+                ss = reader.nextName();
+                switch (ss) {
+                    case "title":
+                        title = reader.nextString();
+                        break;
+                    case "preview_url":
+                        imgUrl = reader.nextString();
+                        break;
+                    default:
+                        reader.skipValue();
+                }
+                if (!title.isEmpty() && !imgUrl.isEmpty()) {
+                    break;
                 }
             }
             reader.close();
