@@ -13,6 +13,7 @@ import java.net.URL;
 import android.graphics.BitmapFactory;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.JsonReader;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,19 +41,11 @@ public class Webcam implements Parcelable {
         mydata = params[3];
         HttpURLConnection conn = null;
         int responseCode = 0;
-        InputStream input;
-        StringBuilder total;
+        JsonReader reader;
         try {
             conn = (HttpURLConnection) Webcams.createNearbyUrl(city.latitude, city.longitude).openConnection();
             responseCode = conn.getResponseCode();
-            input = conn.getInputStream();
-            BufferedReader r = new BufferedReader(new InputStreamReader(input));
-            total = new StringBuilder();
-            String line;
-            while ((line = r.readLine()) != null) {
-                total.append(line);
-            }
-            mydata = total.toString();
+            reader = new JsonReader(new InputStreamReader(conn.getInputStream()));
             if (responseCode != HttpURLConnection.HTTP_OK) {
                 throw new IOException("Wrong response code");
             }
@@ -61,7 +54,7 @@ public class Webcam implements Parcelable {
                 conn.disconnect();
             }
         }
-        value = parse(total.toString(), params, paramsNumber);
+        value = parse(reader, params, paramsNumber);
         if (value != null) {
             try {
                 picture = downloadBitmap(value[3]);
@@ -76,20 +69,49 @@ public class Webcam implements Parcelable {
         return BitmapFactory.decodeStream(conn.getInputStream());
     }
 
-    String[] parse(String in, String[] params, int num) throws IOException, JSONException {
-        JSONObject parsedJSON = null;
-        parsedJSON = new JSONObject(in);
-        if (!parsedJSON.getString("status").equals("ok")) {
-            throw new IOException("Request Failed");
-        }
-        parsedJSON = parsedJSON.getJSONObject("webcams");
-        int s = parsedJSON.getInt("count");
-        String[] ans = null;
-        if (s != 0) {
-            parsedJSON = (JSONObject) parsedJSON.getJSONArray("webcam").get(0);
-            ans = new String[num];
-            for (int i = 0; i < num; i++) {
-                ans[i] = parsedJSON.getString(params[i]);
+    String[] parse(JsonReader reader, String[] params, int num) throws IOException, JSONException {
+        reader.beginObject();
+        String ans[] = null;
+        while (reader.hasNext()) {
+            switch (reader.nextName()) {
+                case "status":
+                    if (!reader.nextString().equals("ok")) {
+                        throw new IOException("Request Failed");
+                    }
+                    break;
+                case "count":
+                    if (reader.nextInt() == 0) {
+                        return null;
+                    }
+                case "webcams":
+                    ans = new String[num];
+                    reader.beginObject();
+                    while (!reader.nextName().equals("webcam")) {
+                        reader.skipValue();
+                    }
+                    reader.beginArray();
+                    if (!reader.hasNext()) {
+                        return null;
+                    }
+                    reader.beginObject();
+                    while (reader.hasNext()) {
+                        boolean t = true;
+
+                        String name = reader.nextName();
+                        for (int i = 0; i < num; i++) {
+                            if (params[i].equals(name)) {
+                                ans[i] = reader.nextString();
+                                t = false;
+                                break;
+                            }
+                        }
+                        if (t) {
+                            reader.skipValue();
+                        }
+                    }
+                    return ans;
+                default:
+                    reader.skipValue();
             }
         }
         return ans;

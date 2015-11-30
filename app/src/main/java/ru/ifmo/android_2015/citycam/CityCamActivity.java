@@ -100,7 +100,7 @@ public class CityCamActivity extends AppCompatActivity {
         return downloadTask;
     }
 
-    enum Progress {
+    static enum Progress {
         OK, NO_WEBCAM, NO_CONNECTION, DOWNLOADING, JSON_ERROR
     }
 
