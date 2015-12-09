@@ -103,7 +103,7 @@ public class CityCamActivity extends AppCompatActivity {
         }
     }
 
-    class DownloadTask extends AsyncTask<City, Integer, Camera> {
+    static class DownloadTask extends AsyncTask<City, Integer, Camera> {
         CityCamActivity activity;
         private Status status = Status.PENDING;
 
@@ -143,7 +143,7 @@ public class CityCamActivity extends AppCompatActivity {
             if (cameras.size() == 0) {
                 return null;
             }
-            Camera camera = cameras.get(new Random(0).nextInt(cameras.size()));
+            Camera camera = cameras.get(new Random(System.currentTimeMillis()).nextInt(cameras.size()));
             try {
                 url = new URL(camera.getPreview_url());
                 httpURLConnection = (HttpURLConnection) url.openConnection();
@@ -167,7 +167,7 @@ public class CityCamActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Camera camer) {
-            camera = camer;
+            activity.camera = camer;
             status = Status.FINISHED;
             activity.showCamera(camer);
         }
@@ -232,7 +232,7 @@ public class CityCamActivity extends AppCompatActivity {
         public void attackActivity(CityCamActivity cityCamActivity) {
             activity = cityCamActivity;
             if (status == status.FINISHED) {
-                showCamera(camera);
+                activity.showCamera(activity.camera);
             }
         }
     }
