@@ -8,11 +8,11 @@ import java.net.URL;
 /**
  * Константы для работы с Webcams API
  */
-public final class Webcams {
+public final class  Webcams {
 
     // Зарегистрируйтесь на http://ru.webcams.travel/developers/
     // и вставьте сюда ваш devid
-    private static final String DEV_ID = "Ваш devid";
+    private static final String DEV_ID = "000ea89a755270652546b3cfd5a60fd5";
 
     private static final String BASE_URL = "http://api.webcams.travel/rest";
 
