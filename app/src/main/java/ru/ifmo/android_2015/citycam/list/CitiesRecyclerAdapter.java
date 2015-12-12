@@ -16,7 +16,6 @@ import ru.ifmo.android_2015.citycam.model.LargeRussianCities;
  */
 public class CitiesRecyclerAdapter extends RecyclerView.Adapter<CitiesRecyclerAdapter.CityViewHolder>
         implements View.OnClickListener {
-
     private final LayoutInflater layoutInflater;
     private CitySelectedListener citySelectedListener;
 
