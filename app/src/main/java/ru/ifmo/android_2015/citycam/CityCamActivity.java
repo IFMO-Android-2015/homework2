@@ -12,11 +12,14 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 
-import org.json.*;
+import android.util.JsonReader;
 
 
 import ru.ifmo.android_2015.citycam.model.City;
@@ -54,34 +57,86 @@ public class CityCamActivity extends AppCompatActivity {
             Log.d("doInBackground", "started doing");
             int res;
             HttpURLConnection connect = null;
+            JsonReader json = null;
+            InputStream inp = null;
             try {
                 URL url = Webcams.createNearbyUrl(activity.city.latitude, activity.city.longitude);
                 connect = (HttpURLConnection) url.openConnection();
-                String s = (new java.util.Scanner(connect.getInputStream()).useDelimiter("\\A")).next();
-                connect.disconnect();
 
-                Log.d("GetCityCam: Response", s);
-                JSONObject root = new JSONObject(s);
-                JSONObject firstCam = root.getJSONObject("webcams").getJSONArray("webcam").getJSONObject(0);
-                activity.camName = firstCam.getString("title");
+                inp = connect.getInputStream();
+                json = new JsonReader(new InputStreamReader(inp));
                 SimpleDateFormat dateFromat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
-                activity.date = dateFromat.format(firstCam.getLong("last_update") * 1000);
-                url = new URL(firstCam.getString("preview_url"));
-                connect = (HttpURLConnection) url.openConnection();
-                Bitmap tmp = BitmapFactory.decodeStream(connect.getInputStream());
-                activity.imageBitmap = tmp;
+                json.beginObject();
+                boolean hasCams = false;
+                while(json.hasNext()) {
+                    if(json.nextName().equals("webcams")) {
+                        json.beginObject();
+                        while(json.hasNext()) {
+                            if(json.nextName().equals("webcam")) {
+                                json.beginArray();
+                                while(json.hasNext()) {
+                                    hasCams = true;
+                                    json.beginObject();
+                                    while (json.hasNext()) {
+                                        String name = json.nextName();
+                                        switch (name) {
+                                            case "title":
+                                                activity.camName = json.nextString();
+                                                break;
+                                            case "last_update":
+                                                activity.date = dateFromat.format(json.nextLong() * 1000);
+                                                break;
+                                            case "preview_url":
+                                                url = new URL(json.nextString());
+                                                break;
+                                            default:
+                                                json.skipValue();
+                                                break;
+                                        }
+                                    }
+                                    json.endObject();
+                                }
+                                json.endArray();
+                            } else {
+                                json.skipValue();
+                            }
+                        }
+                        json.endObject();
+                    } else {
+                        json.skipValue();
+                    }
+                }
+                json.endObject();
+                json.close();
+                inp.close();
                 connect.disconnect();
-                activity.downloadResult = 0;
+                if(hasCams) {
+                    connect = (HttpURLConnection) url.openConnection();
+                    inp = connect.getInputStream();
+                    Bitmap tmp = BitmapFactory.decodeStream(inp);
+                    inp.close();
+                    activity.imageBitmap = tmp;
+                    connect.disconnect();
+                    activity.downloadResult = 0;
+                } else {
+                    activity.downloadResult = 2;
+                }
             } catch(Exception ex) {
                 Log.d("GetCityCam: Exception", ex.getMessage());
-                if(ex instanceof JSONException && ex.getMessage().contains("out of range")) {
-                    activity.downloadResult = 2;
-                } else {
-                    activity.downloadResult = 1;
-                }
+                activity.downloadResult = 1;
             } finally {
                 if(connect != null) {
                     connect.disconnect();
+                }
+                if(json != null) {
+                    try {
+                        json.close();
+                    } catch (IOException e) {}
+                }
+                if(inp != null) {
+                    try {
+                        inp.close();
+                    } catch (IOException e) {}
                 }
 
             }
