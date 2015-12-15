@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.JsonReader;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -16,6 +17,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DateFormat;
@@ -33,7 +35,7 @@ import ru.ifmo.android_2015.citycam.webcams.Webcams;
 public class CityCamActivity extends AppCompatActivity {
 
 
-    private class Downloader extends AsyncTask<Void, Void, Void> {
+    private static class Downloader extends AsyncTask<Void, Void, Void> {
         private CityCamActivity activity;
 
         Downloader(CityCamActivity activity) {
@@ -58,22 +60,11 @@ public class CityCamActivity extends AppCompatActivity {
         protected Void doInBackground(Void... params) {
             try {
                 Log.d("bg", "here");
-                url = Webcams.createNearbyUrl(city.latitude, city.longitude);
+                url = Webcams.createNearbyUrl(activity.city.latitude, activity.city.longitude);
                 conn = (HttpURLConnection) url.openConnection();
-                Scanner sc = new java.util.Scanner(conn.getInputStream()).useDelimiter("\\A");
-                JSONArray info= new JSONObject(sc.next()).getJSONObject("webcams").getJSONArray("webcam");
+                JsonReader reader = new JsonReader(new InputStreamReader(conn.getInputStream()));
+                getInformation(reader);
                 conn.disconnect();
-                Log.d("bg", info.toString());
-                for (int i = 0; i < info.length(); ++i) {
-                    if (info.getJSONObject(i).getString("city").equals(city.name)) {
-                        grabInformation(info.getJSONObject(i));
-                        break;
-                    }
-                    if (i == info.length() - 1) {
-                        grabInformation(info.getJSONObject(0));
-                    }
-                }
-
                 conn = (HttpURLConnection) url.openConnection();
                 activity.image = BitmapFactory.decodeStream(conn.getInputStream());
                 conn.disconnect();
@@ -84,14 +75,68 @@ public class CityCamActivity extends AppCompatActivity {
             return null;
         }
 
-        private void grabInformation(JSONObject jsonObject) throws Exception {
-            url = new URL(jsonObject.getString("preview_url"));
-            activity.views = jsonObject.getInt("view_count");
-            activity.latitude = jsonObject.getDouble("latitude");
-            activity.longitude = jsonObject.getDouble("longitude");
-            activity.cityName = jsonObject.getString("city");
-            activity.date = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
-                    .format(new Date(jsonObject.getInt("last_update") * 1000L));
+
+        private void getInformation(JsonReader reader) throws Exception {
+            reader.beginObject();
+            while (reader.hasNext()) {
+                String name = reader.nextName();
+                if (name.equals("webcams")) {
+                    reader.beginObject();
+                    while (reader.hasNext()) {
+                        name = reader.nextName();
+                        if (name.equals("webcam")) {
+                            reader.beginArray();
+                            while (reader.hasNext()) {
+                                addInfo(reader);
+                            }
+                            reader.endArray();
+
+                        } else {
+                            reader.skipValue();
+                        }
+                    }
+                } else {
+                    reader.skipValue();
+                }
+            }
+            reader.endObject();
+        }
+
+        private void addInfo(JsonReader reader) throws Exception {
+            reader.beginObject();
+            while (reader.hasNext()) {
+                String info = reader.nextName();
+                switch (info) {
+                    case "preview_url": {
+                        url = new URL(reader.nextString());
+                        break;
+                    }
+                    case "view_count": {
+                        activity.views = reader.nextInt();
+                        break;
+                    }
+                    case "latitude": {
+                        activity.latitude = reader.nextDouble();
+                        break;
+                    }
+                    case "longitude": {
+                        activity.longitude = reader.nextDouble();
+                        break;
+                    }
+                    case "city": {
+                        activity.cityName = reader.nextString();
+                        break;
+                    }
+                    case "last_update": {
+                        activity.date = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
+                                        .format(new Date(reader.nextInt()));
+                        break;
+                    }
+                    default:
+                        reader.skipValue();
+                }
+            }
+            reader.endObject();
         }
     }
 
@@ -138,7 +183,7 @@ public class CityCamActivity extends AppCompatActivity {
         camImageView = (ImageView) findViewById(R.id.cam_image);
         progressView = (ProgressBar) findViewById(R.id.progress);
         infoText = (TextView) findViewById(R.id.info);
-        errorText= (TextView) findViewById(R.id.err);
+        errorText = (TextView) findViewById(R.id.err);
 
         infoText.setVisibility(View.INVISIBLE);
         errorText.setVisibility(View.INVISIBLE);
@@ -203,6 +248,7 @@ public class CityCamActivity extends AppCompatActivity {
         updateUI();
         super.onRestoreInstanceState(savedInstanceState);
     }
+
 
     private static final String TAG = "CityCam";
 }
