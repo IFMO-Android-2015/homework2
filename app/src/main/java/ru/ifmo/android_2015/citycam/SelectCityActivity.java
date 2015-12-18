@@ -34,7 +34,6 @@ public class SelectCityActivity extends AppCompatActivity
     @Override
     public void onCitySelected(City city) {
         Log.i(TAG, "onCitySelected: " + city);
-        // Запускаем экран CityCamActivity, который покажет веб-камеру из выбранного города
         Intent cityCam = new Intent(this, CityCamActivity.class);
         cityCam.putExtra(CityCamActivity.EXTRA_CITY, city);
         startActivity(cityCam);
