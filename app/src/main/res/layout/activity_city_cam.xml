@@ -10,7 +10,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_marginTop="20dp"
-        android:layout_centerHorizontal="true">
+        android:layout_centerHorizontal="true"
+        android:id="@+id/frameLayout">
 
         <ImageView
             android:id="@+id/cam_image"
@@ -26,6 +27,30 @@
             android:layout_gravity="center"
             style="@android:style/Widget.Holo.Light.ProgressBar.Large.Inverse"/>
     </FrameLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Title"
+        android:id="@+id/text_title"
+        android:layout_below="@+id/frameLayout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="5dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Rating"
+        android:id="@+id/text_rating"
+        android:layout_below="@+id/text_title"
+        android:layout_alignParentStart="false"
+        android:layout_alignParentEnd="false"
+        android:layout_alignParentTop="false"
+        android:layout_alignParentBottom="false"
+        android:layout_centerHorizontal="true"
+        android:layout_alignWithParentIfMissing="false"
+        android:layout_alignParentRight="false"
+        android:layout_marginTop="25dp" />
 
     <!-- Добавьте сюда еще View с информацией о выбранном городе и показанной веб-камеры -->
 
