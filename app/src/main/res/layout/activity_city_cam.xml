@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#fff">
+    android:background="#fff"
+    android:orientation="vertical"
+    android:gravity="center"
+    >
 
     <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_marginTop="20dp"
+
         android:layout_centerHorizontal="true">
 
         <ImageView
@@ -27,6 +31,13 @@
             style="@android:style/Widget.Holo.Light.ProgressBar.Large.Inverse"/>
     </FrameLayout>
 
-    <!-- Добавьте сюда еще View с информацией о выбранном городе и показанной веб-камеры -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="(loading ... )"
+        android:id="@+id/textView"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
 
-</RelativeLayout>
+
+</LinearLayout>
