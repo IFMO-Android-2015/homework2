@@ -107,17 +107,11 @@ public class CityCamActivity extends AppCompatActivity {
             InputStream inputStream = null;
             try {
                 Webcam webcam = city2webcam(params[0]);
-                Log.e("GOVNO", webcam == null ? "webcam null" : "webcam ok");
                 if (webcam != Webcam.BAD_INTERNET && webcam != Webcam.NO_WEBCAM) {
-//                    Log.e("GOVNO", webcam.getUrl() == null ? "null" : webcam.getUrl());
                     URL url = new URL(webcam.getUrl());
-//                    Log.e("GOVNO", webcam.getImage() == null ? "null" : webcam.getImage().toString());
                     connection = (HttpURLConnection) url.openConnection();
-//                    Log.e("GOVNO", webcam.getImage() == null ? "null" : webcam.getImage().toString());
                     inputStream = connection.getInputStream();
-//                    Log.e("GOVNO", webcam.getImage() == null ? "null" : webcam.getImage().toString());
                     webcam.setImage(BitmapFactory.decodeStream(inputStream));
-//                    Log.e("GOVNO", webcam.getImage() == null ? "null" : webcam.getImage().toString());
                 }
                 Log.e("WEB", webcam == null ? "null" : "not null");
                 savedWebcam = webcam;
