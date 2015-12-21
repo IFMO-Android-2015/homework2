@@ -6,6 +6,7 @@
     android:background="#fff">
 
     <FrameLayout
+        android:id="@+id/frame"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -16,6 +17,7 @@
             android:id="@+id/cam_image"
             android:layout_width="320dp"
             android:layout_height="200dp"
+
             android:scaleType="centerCrop"
             android:background="#999"/>
 
@@ -24,8 +26,22 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            style="@android:style/Widget.Holo.Light.ProgressBar.Large.Inverse"/>
+            style="@android:style/Widget.Holo.Light.ProgressBar.Large.Inverse" />
+
     </FrameLayout>
+
+    <TextView
+        android:id="@+id/webStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:text="No Webcam in this city.."
+        android:textSize="23sp"
+        android:gravity="center"
+        android:textColor="#4b0082"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/frame"/>
+
 
     <!-- Добавьте сюда еще View с информацией о выбранном городе и показанной веб-камеры -->
 
