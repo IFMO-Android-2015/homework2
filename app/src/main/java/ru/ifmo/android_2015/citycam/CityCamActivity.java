@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import ru.ifmo.android_2015.citycam.model.City;
+import ru.ifmo.android_2015.citycam.util.DownloadPhotoTask;
 
 /**
  * Экран, показывающий веб-камеру одного выбранного города.
@@ -24,6 +25,7 @@ public class CityCamActivity extends AppCompatActivity {
 
     private ImageView camImageView;
     private ProgressBar progressView;
+    private DownloadPhotoTask downloadPhotoTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +47,20 @@ public class CityCamActivity extends AppCompatActivity {
 
         // Здесь должен быть код, инициирующий асинхронную загрузку изображения с веб-камеры
         // в выбранном городе.
+        if (savedInstanceState != null) {
+            downloadPhotoTask = (DownloadPhotoTask) getLastCustomNonConfigurationInstance();
+        }
+        if (downloadPhotoTask == null) {
+            downloadPhotoTask = new DownloadPhotoTask();
+            downloadPhotoTask.execute(city);
+        }
+        downloadPhotoTask.attach(this);
+    }
+
+    @Override
+    public Object onRetainCustomNonConfigurationInstance() {
+        downloadPhotoTask.detach();
+        return downloadPhotoTask;
     }
 
     private static final String TAG = "CityCam";
