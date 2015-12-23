@@ -1,23 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#fff">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
 
     <FrameLayout
+        android:id="@+id/cam_frame"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="20dp"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/image_frame">
+        android:layout_centerVertical="true">
 
         <ImageView
             android:id="@+id/cam_image"
-            android:layout_width="320dp"
-            android:layout_height="200dp"
-            android:scaleType="centerCrop"
+            android:layout_marginLeft="5dp"
+            android:layout_width="360dp"
+            android:layout_height="230dp"
             android:background="#999"/>
 
         <ProgressBar
@@ -29,28 +24,27 @@
     </FrameLayout>
 
     <LinearLayout
+        android:layout_marginTop="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="250dp"
-        android:layout_marginLeft="10dp"
+        android:layout_marginLeft="370dp"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/cam_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Название камеры: "
+            android:text="Название камеры:"
             android:textColor="#000000"
             android:textSize="14dp"
             android:visibility="invisible"/>
 
         <TextView
+            android:id="@+id/cam_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/cam_title"
             android:textSize="14dp"/>
+
+
     </LinearLayout>
-
-    <!-- Добавьте сюда еще View с информацией о выбранном городе и показанной веб-камеры -->
-
 </RelativeLayout>
