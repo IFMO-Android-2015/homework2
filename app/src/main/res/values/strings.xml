@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">City Cam</string>
+    <string name="iDownloading">info downloading</string>
+    <string name="pDownloading">picture downloading</string>
+    <string name="done">done</string>
+    <string name="error">error</string>
+    <string name="downloading">downloading</string>
 </resources>
