@@ -76,8 +76,6 @@ public class CityCamActivity extends AppCompatActivity {
     public void onSaveInstanceState(Bundle bundle) {
         bundle.putString("CAM_NAME", camName.getText().toString());
         bundle.putString("CAM_TITLE", camTitle.getText().toString());
-        bundle.putString("LATITUDE", lat.getText().toString());
-        bundle.putString("LONGITUDE", lon.getText().toString());
         Drawable temp = camImageView.getDrawable();
         if (temp != null) {
             bundle.putParcelable("CAM_IMAGE", ((BitmapDrawable) temp).getBitmap());
@@ -90,8 +88,6 @@ public class CityCamActivity extends AppCompatActivity {
         if (bundle != null) {
             camName.setText(bundle.getString("CAM_NAME"));
             camTitle.setText(bundle.getString("CAM_TITLE"));
-            lat.setText(bundle.getString("LATITUDE"));
-            lon.setText(bundle.getString("LONGITUDE"));
             if (downloadTask.getProgress() == DownloadImageTask.Progress.GettingImage ||
                     downloadTask.getProgress() == DownloadImageTask.Progress.GettingInfo) {
                 progressView.setVisibility(View.VISIBLE);
@@ -101,15 +97,8 @@ public class CityCamActivity extends AppCompatActivity {
                 camImageView.setImageBitmap(bitmap);
                 camImageView.setVisibility(View.VISIBLE);
                 progressView.setVisibility(View.INVISIBLE);
-                if (downloadTask.getProgress() == DownloadImageTask.Progress.Error) {
+                if (downloadTask.getProgress() == DownloadImageTask.Progress.Error)
                     camName.setVisibility(View.INVISIBLE);
-                } else {
-                    coordinates.setVisibility(View.VISIBLE);
-                    latTitle.setVisibility(View.VISIBLE);
-                    lat.setVisibility(View.VISIBLE);
-                    lonTitle.setVisibility(View.VISIBLE);
-                    lon.setVisibility(View.VISIBLE);
-                }
             }
         }
         super.onRestoreInstanceState(bundle);
