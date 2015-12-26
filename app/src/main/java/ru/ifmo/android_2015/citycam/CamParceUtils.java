@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Created by Dan) on 09.11.2015.
+ * Created by Dan) on 09.11.2015. .
  */
 final class CamParceUtils {
     CamParceUtils() {}
@@ -29,7 +29,6 @@ final class CamParceUtils {
         InputStreamReader inputStreamReader = null;
         BufferedReader bufferedReader = null;
         JsonReader jsonReader = null;
-
         try{
             int responseCode = conn.getResponseCode();
             Log.d(TAG, "Received HTTP response code: " + responseCode);
