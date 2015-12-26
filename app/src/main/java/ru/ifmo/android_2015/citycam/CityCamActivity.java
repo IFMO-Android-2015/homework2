@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import ru.ifmo.android_2015.citycam.model.City;
 
@@ -20,11 +21,17 @@ public class CityCamActivity extends AppCompatActivity {
      */
     public static final String EXTRA_CITY = "city";
 
-    private City city;
+    City city;
 
-    private ImageView camImageView;
-    private ProgressBar progressView;
+    public ImageView camImageView;
+    public ProgressBar progressView;
+    public TextView webcamNameView;
+    public TextView latitudeView;
+    public TextView longitudeView;
+    public TextView  viewCountView;
+    public TextView userNameView;
 
+    private DownloadAsyncTask asyncTask;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +45,11 @@ public class CityCamActivity extends AppCompatActivity {
         setContentView(R.layout.activity_city_cam);
         camImageView = (ImageView) findViewById(R.id.cam_image);
         progressView = (ProgressBar) findViewById(R.id.progress);
+        webcamNameView = (TextView) findViewById(R.id.webcam_name);
+        latitudeView = (TextView) findViewById(R.id.latitude);
+        longitudeView = (TextView) findViewById(R.id.longitude);
+        viewCountView = (TextView) findViewById(R.id.view_count);
+        userNameView = (TextView) findViewById(R.id.user_name);
 
         getSupportActionBar().setTitle(city.name);
 
@@ -45,6 +57,21 @@ public class CityCamActivity extends AppCompatActivity {
 
         // Здесь должен быть код, инициирующий асинхронную загрузку изображения с веб-камеры
         // в выбранном городе.
+
+        if (savedInstanceState != null) {
+            asyncTask = (DownloadAsyncTask) getLastCustomNonConfigurationInstance();
+        }
+        if (asyncTask == null) {
+            asyncTask = new DownloadAsyncTask(this);
+            asyncTask.execute(city);
+        } else {
+            asyncTask.attachActivity(this);
+        }
+    }
+
+    @Override
+    public Object onRetainCustomNonConfigurationInstance() {
+        return asyncTask;
     }
 
     private static final String TAG = "CityCam";

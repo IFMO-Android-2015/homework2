@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">City Cam</string>
+    <string name="warning_string">Что-то пошло не так</string>
+    <string name="webcam_name">"Имя камеры: "</string>
+    <string name="view_count">"Количество просмотров: "</string>
+    <string name="longitude">"Долгота: "</string>
+    <string name="latitude">"Широта: "</string>
+    <string name="user_name">"Имя владельца: "</string>
+</resources>
