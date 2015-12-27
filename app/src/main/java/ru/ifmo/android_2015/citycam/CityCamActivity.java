@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import ru.ifmo.android_2015.citycam.model.City;
 
@@ -21,9 +22,10 @@ public class CityCamActivity extends AppCompatActivity {
     public static final String EXTRA_CITY = "city";
 
     private City city;
-
-    private ImageView camImageView;
-    private ProgressBar progressView;
+    private DownloadCity downloadCity;
+    protected ImageView camImageView;
+    protected TextView titleTextView;
+    protected ProgressBar progressView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,13 +40,27 @@ public class CityCamActivity extends AppCompatActivity {
         setContentView(R.layout.activity_city_cam);
         camImageView = (ImageView) findViewById(R.id.cam_image);
         progressView = (ProgressBar) findViewById(R.id.progress);
+        titleTextView = (TextView) findViewById(R.id.title);
 
         getSupportActionBar().setTitle(city.name);
 
         progressView.setVisibility(View.VISIBLE);
 
-        // Здесь должен быть код, инициирующий асинхронную загрузку изображения с веб-камеры
-        // в выбранном городе.
+        // Здесь код, инициирующий асинхронную загрузку изображения с веб-камеры в выбранном городе.
+
+        if (savedInstanceState != null) {
+            downloadCity = (DownloadCity) getLastCustomNonConfigurationInstance();
+        }
+        if (downloadCity != null) {
+            downloadCity.attachActivity(this);
+        } else {
+            downloadCity = new DownloadCity(this, city);
+            downloadCity.execute();
+        }
+    }
+
+    public Object onRetainCustomNonConfigurationInstance() {
+        return downloadCity;
     }
 
     private static final String TAG = "CityCam";
