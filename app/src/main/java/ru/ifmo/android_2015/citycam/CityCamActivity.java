@@ -24,6 +24,7 @@ public class CityCamActivity extends AppCompatActivity {
 
     private ImageView camImageView;
     private ProgressBar progressView;
+    DownloadInformationTask dit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +46,20 @@ public class CityCamActivity extends AppCompatActivity {
 
         // Здесь должен быть код, инициирующий асинхронную загрузку изображения с веб-камеры
         // в выбранном городе.
+
+        if (savedInstanceState != null) {
+            dit = (DownloadInformationTask) getLastCustomNonConfigurationInstance();
+            dit.cityCamActivity = this;
+        }
+        else {
+            dit = new DownloadInformationTask(this);
+            dit.execute(city);
+        }
+
+    }
+
+    public Object onRetainCustomNonConfigurationInstance() {
+        return dit;
     }
 
     private static final String TAG = "CityCam";
