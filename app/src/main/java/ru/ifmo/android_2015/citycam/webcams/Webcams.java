@@ -6,13 +6,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- * РљРѕРЅСЃС‚Р°РЅС‚С‹ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ Webcams API
+ * Константы для работы с Webcams API
  */
 public final class Webcams {
 
-    // Р—Р°СЂРµРіРёСЃС‚СЂРёСЂСѓР№С‚РµСЃСЊ РЅР° http://ru.webcams.travel/developers/
-    // Рё РІСЃС‚Р°РІСЊС‚Рµ СЃСЋРґР° РІР°С€ devid
-    private static final String DEV_ID = "Р’Р°С€ devid";
+    // Зарегистрируйтесь на http://ru.webcams.travel/developers/
+    // и вставьте сюда ваш devid
+    private static final String DEV_ID = "e7ebdc730789e468792d11f95e63d35e";
 
     private static final String BASE_URL = "http://api.webcams.travel/rest";
 
@@ -27,8 +27,8 @@ public final class Webcams {
     private static final String FORMAT_JSON = "json";
 
     /**
-     * Р’РѕР·РІСЂР°С‰Р°РµС‚ URL РґР»СЏ РІС‹РїРѕР»РЅРµРЅРёСЏ Р·Р°РїСЂРѕСЃР° Webcams API РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ
-     * РёРЅС„РѕСЂРјР°С†РёРё Рѕ РІРµР±-РєР°РјРµСЂР°С… СЂСЏРґРѕРј СЃ СѓРєР°Р·Р°РЅРЅС‹РјРё РєРѕРѕСЂРґРёРЅР°С‚Р°РјРё РІ С„РѕСЂРјР°С‚Рµ JSON.
+     * Возвращает URL для выполнения запроса Webcams API для получения
+     * информации о веб-камерах рядом с указанными координатами в формате JSON.
      */
     public static URL createNearbyUrl(double latitude, double longitude)
             throws MalformedURLException {
