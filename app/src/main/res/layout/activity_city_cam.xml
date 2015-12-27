@@ -6,6 +6,7 @@
     android:background="#fff">
 
     <FrameLayout
+        android:id="@+id/frame"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -28,5 +29,12 @@
     </FrameLayout>
 
     <!-- Добавьте сюда еще View с информацией о выбранном городе и показанной веб-камеры -->
-
+    <TextView
+            android:id="@+id/title"
+            android:layout_below="@id/frame"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="20dp"
+            android:textSize="18sp"/>
 </RelativeLayout>
