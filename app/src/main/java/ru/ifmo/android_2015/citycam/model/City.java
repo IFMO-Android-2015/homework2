@@ -1,7 +1,9 @@
 package ru.ifmo.android_2015.citycam.model;
 
+import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.StrictMode;
 
 /**
  * Город
@@ -66,4 +68,21 @@ public class City implements Parcelable {
             return new City[size];
         }
     };
+
+    public static class Data {
+        public String title, url_of_preview;
+        public Bitmap image;
+
+        public Data (final String title, final String url_of_preview, final Bitmap image) {
+            this.title = title;
+            this.url_of_preview = url_of_preview;
+            this.image = image;
+        }
+
+        public Data() {
+            this.title = null;
+            this.url_of_preview = null;
+            this.image = null;
+        }
+    }
 }
