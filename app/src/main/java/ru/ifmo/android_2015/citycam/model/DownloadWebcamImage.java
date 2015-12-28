@@ -119,14 +119,15 @@ public class DownloadWebcamImage extends AsyncTask<City, Void, Webcam> {
         JsonReader reader = new JsonReader(new InputStreamReader(is, "UTF-8"));
         try {
             reader.beginObject();
-            switch (reader.nextName()) {
-                case "webcams": {
-                    webcams = readWebcams(reader);
-                    break;
-                }
-                default: {
-                    reader.skipValue();
-                    break;
+            while (reader.hasNext()) {
+                switch (reader.nextName()) {
+                    case "webcams": {
+                        webcams = readWebcams(reader);
+                        break;
+                    }
+                    default: {
+                        reader.skipValue();
+                    }
                 }
             }
             reader.endObject();
