@@ -12,8 +12,8 @@ public final class Webcams {
 
     // Зарегистрируйтесь на http://ru.webcams.travel/developers/
     // и вставьте сюда ваш devid
-    private static final String DEV_ID = "Ваш devid";
-
+   // private static final String DEV_ID = "dd75b4e9b520fe3e8d83a55207df27c3";82da93d355f0d007cd6932468a867fee
+    private static final String DEV_ID = "dd75b4e9b520fe3e8d83a55207df27c3";
     private static final String BASE_URL = "http://api.webcams.travel/rest";
 
     private static final String PARAM_DEVID = "devid";
