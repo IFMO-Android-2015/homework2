@@ -1,5 +1,8 @@
 package ru.ifmo.android_2015.citycam;
 
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -21,9 +24,10 @@ public class CityCamActivity extends AppCompatActivity {
     public static final String EXTRA_CITY = "city";
 
     private City city;
-
+    private static final String IMAGE = "image";
     private ImageView camImageView;
     private ProgressBar progressView;
+    private WebcamInfoDownloader downloader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,9 +47,44 @@ public class CityCamActivity extends AppCompatActivity {
 
         progressView.setVisibility(View.VISIBLE);
 
-        // Здесь должен быть код, инициирующий асинхронную загрузку изображения с веб-камеры
-        // в выбранном городе.
+        if (savedInstanceState != null) {
+            downloader = (WebcamInfoDownloader) getLastCustomNonConfigurationInstance();
+            downloader.attachActivity(this);
+        }
+        if (downloader == null) {
+            downloader = new WebcamInfoDownloader(this, city);
+            downloader.execute();
+        }
     }
 
     private static final String TAG = "CityCam";
+
+    @Override
+    public Object onRetainCustomNonConfigurationInstance() {
+        return downloader;
+    }
+
+    @Override
+        protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            if (downloader.getProgress() == WebcamInfoDownloader.Progress.DONE || downloader.getProgress() == WebcamInfoDownloader.Progress.ERROR) {
+                progressView.setVisibility(View.GONE);
+                Bitmap img = (savedInstanceState.getParcelable(IMAGE));
+                camImageView.setImageBitmap(img);
+            }
+             else {
+                progressView.setVisibility(View.VISIBLE);
+            }
+        }
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
+    @Override
+        protected void onSaveInstanceState(Bundle outState) {
+                Drawable img_to_bundle = camImageView.getDrawable();
+                if (img_to_bundle != null) {
+                        outState.putParcelable(IMAGE, ((BitmapDrawable) img_to_bundle).getBitmap());
+                    }
+                super.onSaveInstanceState(outState);
+            }
 }
