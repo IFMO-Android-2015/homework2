@@ -30,6 +30,10 @@ public class WebcamInfoDownloader extends AsyncTask<Void, Void, Bitmap> {
         progress = Progress.PARSING_JSON;
     }
 
+    public void attachActivity(CityCamActivity activity) {
+        this.attachedActivity = activity;
+    }
+
     @Override
     protected Bitmap doInBackground(Void... params) {
         JsonReader jsonReader = null;

@@ -49,6 +49,7 @@ public class CityCamActivity extends AppCompatActivity {
 
         if (savedInstanceState != null) {
             downloader = (WebcamInfoDownloader) getLastCustomNonConfigurationInstance();
+            downloader.attachActivity(this);
         }
         if (downloader == null) {
             downloader = new WebcamInfoDownloader(this, city);
@@ -71,7 +72,9 @@ public class CityCamActivity extends AppCompatActivity {
                 Bitmap img = (savedInstanceState.getParcelable(IMAGE));
                 camImageView.setImageBitmap(img);
             }
-            progressView.setVisibility(View.VISIBLE);
+             else {
+                progressView.setVisibility(View.VISIBLE);
+            }
         }
         super.onRestoreInstanceState(savedInstanceState);
     }
