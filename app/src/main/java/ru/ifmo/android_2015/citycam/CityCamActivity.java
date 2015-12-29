@@ -126,51 +126,39 @@ public class CityCamActivity extends AppCompatActivity {
             } catch (Exception e) {
                 Log.e(TAG, "Error downloading file: " + e, e);
             }
+            Log.d(TAG, "Start downloading picture...");
+            if (result != null) {
+                String urldisplay = result.preview_url;
+                camImg = null;
+                try {
+                    InputStream in = new java.net.URL(urldisplay).openStream();
+                    camImg = BitmapFactory.decodeStream(in);
+                } catch (Exception e) {
+                    Log.e("Error", "Error downloading img");
+                    e.printStackTrace();
+                }
+            }
             return result;
         }
 
         @Override
         protected void onPostExecute(Cam result) {
             // Log.d(TAG, "successful: " + successful);
-            if (result != null) {
-                Log.d(TAG, "Successful parse cam");
-                thisCam = result;
-                textView.setText(thisCam.title);
-                DownloadImageTask downloadImageTask = new DownloadImageTask();
-                downloadImageTask.execute(thisCam.preview_url);
+            if (activity != null) {
+                if (result != null) {
+                    Log.d(TAG, "Successful parse cam");
+                    thisCam = result;
+                    textView.setText(thisCam.title);
+                    progressView.setVisibility(View.INVISIBLE);
+                    if (camImg != null) {
+                        camImageView.setImageBitmap(camImg);
+                    }
+                } else {
+                    progressView.setVisibility(View.INVISIBLE);
+                    textView.setText("Ошибка загрузки, попробуйте позже");
+                }
             } else {
-                progressView.setVisibility(View.INVISIBLE);
-                textView.setText("Ошибка загрузки, попробуйте позже");
-            }
-        }
-    }
-
-    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-
-        public DownloadImageTask() {
-        }
-        protected Bitmap doInBackground(String... urls) {
-            Log.d(TAG, "Start downloading picture...");
-            String urldisplay = urls[0];
-            Bitmap image = null;
-            try {
-                InputStream in = new java.net.URL(urldisplay).openStream();
-                image = BitmapFactory.decodeStream(in);
-            } catch (Exception e) {
-                Log.e("Error", "Error downloading img");
-                e.printStackTrace();
-            }
-            return image;
-        }
-
-        protected void onPostExecute(Bitmap result) {
-            if (result != null) {
-                camImg = result;
-                camImageView.setImageBitmap(result);
-                progressView.setVisibility(View.INVISIBLE);
-            } else {
-                progressView.setVisibility(View.INVISIBLE);
-                textView.setText("Ошибка загрузки, попробуйте позже");
+                Log.e(TAG, "Activity is null");
             }
         }
     }
