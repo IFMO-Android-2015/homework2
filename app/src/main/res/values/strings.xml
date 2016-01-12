@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">City Cam</string>
+    <string name="last_update">"Последнее обновление: "</string>
+    <string name="message_check_internet_connection">Проверьте Ваше соединение с интернетом</string>
+    <string name="cant_download_image">Не удалось загрузить изображение</string>
+    <string name="view_count">Просмотрено: %1$s раз</string>
 </resources>

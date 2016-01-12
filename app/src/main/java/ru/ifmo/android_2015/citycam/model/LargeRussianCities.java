@@ -10,7 +10,7 @@ public final class LargeRussianCities {
     private static City[] cities = new City[COUNT];
 
     public static int getCount() {
-        return 90;
+        return COUNT;
     }
 
     public static City getCity(int position) {
