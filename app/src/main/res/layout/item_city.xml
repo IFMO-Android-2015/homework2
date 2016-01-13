@@ -3,7 +3,6 @@
     android:id="@+id/city_name"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:textAppearance="?android:attr/textAppearanceListItemSmall"
     android:gravity="center_vertical"
     android:paddingLeft="?android:attr/listPreferredItemPaddingLeft"
     android:paddingRight="?android:attr/listPreferredItemPaddingRight"
@@ -11,4 +10,5 @@
     android:focusableInTouchMode="false"
     android:focusable="true"
     android:clickable="true"
-    android:background="@drawable/item_selector_bg"/>
+    android:textColor="#000000"
+    android:autoText="false" />

@@ -38,6 +38,7 @@ public class CitiesRecyclerAdapter extends RecyclerView.Adapter<CitiesRecyclerAd
     @Override
     public void onBindViewHolder(CityViewHolder holder, int position) {
         City city = LargeRussianCities.getCity(position);
+
         holder.cityNameView.setText(city.name);
         holder.itemView.setTag(R.id.tag_city, city);
     }
