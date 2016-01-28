@@ -1,27 +1,31 @@
 ﻿package ru.ifmo.android_2015.citycam;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.JsonReader;
-import android.util.JsonToken;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
+import org.w3c.dom.Text;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import ru.ifmo.android_2015.citycam.model.City;
+import ru.ifmo.android_2015.citycam.webcams.Webcam;
 import ru.ifmo.android_2015.citycam.webcams.Webcams;
 
 /**
@@ -39,37 +43,11 @@ public class CityCamActivity extends AppCompatActivity {
 
     private ImageView camImageView;
     private ProgressBar progressView;
-    private DownloadJsonTask downloadTask;
-    private TextView titleTextView;
-    private CamData cameraData;
+    private TextView webcamInfo, webcamTitle;
+    private Webcam webcam;
+    DownloadWebcamInfoTask downloadTask;
 
-    class CamData {
-        Bitmap image;
-        String title;
-    }
 
-    class SavedData {
-        CamData webcam;
-        DownloadJsonTask task;
-    }
-
-    void updateUI(CamData data) {
-        progressView.setVisibility(View.INVISIBLE);
-        if(data.image != null) {
-            camImageView.setImageBitmap(data.image);
-            titleTextView.setText(data.title);
-        } else {
-            titleTextView.setText("No data for this cam");
-        }
-    }
-
-    @Override
-    public SavedData onRetainCustomNonConfigurationInstance() {
-        SavedData data = new SavedData();
-        data.task = this.downloadTask;
-        data.webcam = this.cameraData;
-        return data;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,166 +62,195 @@ public class CityCamActivity extends AppCompatActivity {
         setContentView(R.layout.activity_city_cam);
         camImageView = (ImageView) findViewById(R.id.cam_image);
         progressView = (ProgressBar) findViewById(R.id.progress);
-        titleTextView = (TextView) findViewById(R.id.titleTextView);
+        webcamInfo = (TextView) findViewById(R.id.info);
+        webcamTitle = (TextView) findViewById(R.id.title);
 
         getSupportActionBar().setTitle(city.name);
 
         progressView.setVisibility(View.VISIBLE);
 
+        // Здесь должен быть код, инициирующий асинхронную загрузку изображения с веб-камеры
+        // в выбранном городе.
+
         if (savedInstanceState != null) {
-            SavedData loaded = (SavedData)getLastCustomNonConfigurationInstance();
-            downloadTask = loaded.task;
-            cameraData = loaded.webcam;
-            updateUI(cameraData);
+            downloadTask = (DownloadWebcamInfoTask) getLastCustomNonConfigurationInstance();
         }
         if (downloadTask == null) {
-            downloadTask = new DownloadJsonTask(this);
-            downloadTask.execute();
+            downloadTask = new DownloadWebcamInfoTask(this);
+            downloadTask.execute(city);
         } else {
             downloadTask.attachActivity(this);
         }
     }
-    enum DownloadState {
-        DOWNLOADING(R.string.downloading),
-        DONE(R.string.done),
-        ERROR(R.string.error);
 
-        // ID строкового ресурса для заголовка окна прогресса
-        final int titleResId;
+    @Override
+    public Object getLastCustomNonConfigurationInstance() {
+        return downloadTask;
+    }
 
-        DownloadState(int titleResId) {
-            this.titleResId = titleResId;
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelable("webcam", webcam);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        showWebcamInfo((Webcam) savedInstanceState.get("webcam"));
+    }
+
+    public void showWebcamInfo (Webcam webcam) {
+        if (webcam != null) {
+            progressView.setVisibility(View.INVISIBLE);
+            camImageView.setImageBitmap(webcam.getImage());
+            webcamInfo.setText("Latitude: " + webcam.getLatitude() + "\nLongitude: " + webcam.getLongitude() + "\nRating: " + webcam.getRating());
+            webcamTitle.setText(webcam.getTitle());
+        } else {
+            webcamTitle.setText("Error");
         }
     }
 
-    private static class DownloadJsonTask extends AsyncTask<Void, Integer, DownloadState> {
+    static class DownloadWebcamInfoTask extends AsyncTask<City, Void, Webcam> {
+        CityCamActivity activity;
 
-        private DownloadState state = DownloadState.DOWNLOADING;
-        private CityCamActivity activity;
+        public enum Status {ERROR, WORKING, FINISHED}
+        private Status status;
 
-        DownloadJsonTask(CityCamActivity activity) {
-            this.activity = activity;
+        public Status getTaskStatus() {
+            return status;
         }
 
-        void attachActivity(CityCamActivity activity) {
+        DownloadWebcamInfoTask(CityCamActivity activity) {
             this.activity = activity;
+            status = Status.WORKING;
+        }
+
+        public void attachActivity(CityCamActivity activity) {
+            this.activity = activity;
+            if (status == Status.FINISHED)  {
+                activity.showWebcamInfo(activity.webcam);
+            }
+        }
+
+
+
+        @Override
+        protected Webcam doInBackground(City... params) {
+            status = Status.WORKING;
+            HttpURLConnection httpURLConnection = null;
+            InputStream inputStream = null;
+            URL url;
+            List<Webcam> webcams = new ArrayList<>();
+            try {
+                url = Webcams.createNearbyUrl(params[0].latitude, params[0].longitude);
+                httpURLConnection = (HttpURLConnection) url.openConnection();
+                httpURLConnection.setRequestMethod("GET");
+                httpURLConnection.setDoOutput(true);
+                httpURLConnection.connect();
+
+                inputStream = httpURLConnection.getInputStream();
+                JsonReader reader = new JsonReader(new InputStreamReader(inputStream));
+                webcams = parseJSON(reader);
+            } catch (IOException e) {
+                Log.e(TAG, e.getMessage());
+            } finally {
+                if (inputStream != null) {
+                    try {
+                        inputStream.close();
+                    } catch (IOException e) {
+                        Log.e(TAG, e.getMessage());
+                    }
+                }
+            }
+            if (webcams.size() == 0) {
+                return null;
+            }
+            Webcam webcam = webcams.get(0);
+            try {
+                url = new URL(webcam.getPreviewUrl());
+                httpURLConnection = (HttpURLConnection) url.openConnection();
+
+                inputStream = httpURLConnection.getInputStream();
+                webcam.setImage(BitmapFactory.decodeStream(inputStream));
+            } catch (IOException e) {
+                Log.e(TAG, e.getMessage());
+            } finally {
+                if(inputStream != null) {
+                    try {
+                        inputStream.close();
+                    } catch (IOException e) {
+                        Log.e(TAG, e.getMessage());
+                    }
+                }
+            }
+            return webcam;
         }
 
         @Override
-        protected DownloadState doInBackground(Void... voids) {
-            try {
-                this.activity.downloadFile(this.activity.getApplicationContext());
-                state = DownloadState.DONE;
-
-            } catch (Exception e) {
-                Log.e(TAG, "Error downloading file: " + e, e);
-                state = DownloadState.ERROR;
-            }
-            return state;
+        protected void onPostExecute(Webcam webcam) {
+            activity.webcam = webcam;
+            status = Status.FINISHED;
+            activity.showWebcamInfo(webcam);
         }
-    }
 
-    void downloadFile(Context context) throws IOException {
-        File destFile = FileUtils.createTempExternalFile(context, ".json");
-        DownloadUtils.downloadFile(Webcams.createNearbyUrl(this.city.latitude, this.city.longitude).toString(), destFile);
-        InputStreamReader inputStreamReader = null;
-        BufferedReader bufferedReader = null;
-        JsonReader jsonReader = null;
-        String imageUrl = null;
-        String title = null;
-        try {
-            inputStreamReader = new InputStreamReader(new FileInputStream(destFile));
-            bufferedReader = new BufferedReader(inputStreamReader);
-            jsonReader = new JsonReader(bufferedReader);
+        protected List<Webcam> parseJSON(JsonReader jsonReader) throws IOException {
+            List<Webcam> res = new ArrayList<>();
             jsonReader.beginObject();
             while (jsonReader.hasNext()) {
-                final String name = jsonReader.nextName();
-                final boolean isNull = jsonReader.peek() == JsonToken.NULL;
-                if(name.equals("webcams") && !isNull) {
+                String name = jsonReader.nextName();
+                if (name.equals("webcams")) {
                     jsonReader.beginObject();
                     while (jsonReader.hasNext()) {
-                        final String nextName = jsonReader.nextName();
-                        final boolean isNextNull = jsonReader.peek() == JsonToken.NULL;
-                        if(nextName.equals("webcam") && !isNextNull) {
+                        name = jsonReader.nextName();
+                        if (name.equals("webcam")) {
                             jsonReader.beginArray();
                             while (jsonReader.hasNext()) {
-                                jsonReader.beginObject();
-                                while (jsonReader.hasNext()) {
-                                    final String webcamName = jsonReader.nextName();
-                                    final boolean webcamNameNull = jsonReader.peek() == JsonToken.NULL;
-                                    boolean skip = true;
-                                    if(!webcamNameNull) {
-                                        if(webcamName.equals("preview_url")) {
-                                            imageUrl = jsonReader.nextString();
-                                            skip = false;
-                                        }
-                                        if(webcamName.equals("title")) {
-                                            title = jsonReader.nextString();
-                                            skip = false;
-                                        }
-                                    }
-                                    if (skip)
-                                        jsonReader.skipValue();
-                                }
-                                jsonReader.endObject();
+                                res.add(parseWebcamInfo(jsonReader));
                             }
                             jsonReader.endArray();
-                        } else jsonReader.skipValue();
+                        } else {
+                            jsonReader.skipValue();
+                        }
                     }
                     jsonReader.endObject();
-                } else jsonReader.skipValue();
+                } else {
+                    jsonReader.skipValue();
+                }
             }
             jsonReader.endObject();
+            return res;
         }
-        catch (Exception e) {
-            e.printStackTrace();
-            Log.e("Parsing", "Cant parse json.");
-        }
-        finally {
-            if(bufferedReader != null)
-                bufferedReader.close();
-            if(jsonReader != null)
-                jsonReader.close();
-            if(inputStreamReader != null)
-                inputStreamReader.close();
-        }
-        if(imageUrl != null) {
-            File previewFile = FileUtils.createTempExternalFile(context, ".jpg");
-            DownloadUtils.downloadFile(imageUrl, previewFile);
-            InputStream bitmapInputStream;
-            try {
-                bitmapInputStream = new FileInputStream(previewFile);
-                final Bitmap bitmap = BitmapFactory.decodeStream(bitmapInputStream);
-                final CamData data = new CamData();
-                data.image = bitmap;
-                data.title = title;
-                this.cameraData = data;
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        updateUI(data);
-                    }
-                });
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.e("Image Processing", "Cant decode bitmap.");
-            }
-        } else {
-            Log.e("Parsing", "No webcams in this location.");
-        }
-        //Что-то не получилось, пишем что не нашли камеры
-        if(this.cameraData == null) {
-            final CamData data = new CamData();
-            this.cameraData = data;
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    updateUI(data);
+
+        protected Webcam parseWebcamInfo(JsonReader jsonReader) throws IOException {
+            jsonReader.beginObject();
+            Webcam webcam = new Webcam();
+            while (jsonReader.hasNext()) {
+                String name = jsonReader.nextName();
+                switch (name) {
+                    case "latitude":
+                        webcam.setLatitude(jsonReader.nextDouble());
+                        break;
+                    case "longitude":
+                        webcam.setLongitude(jsonReader.nextDouble());
+                        break;
+                    case "rating_avg":
+                        webcam.setRating(jsonReader.nextDouble());
+                        break;
+                    case "title":
+                        webcam.setTitle(jsonReader.nextString());
+                        break;
+                    case "preview_url":
+                        webcam.setPreviewUrl(jsonReader.nextString());
+                        break;
+                    default:
+                        jsonReader.skipValue();
                 }
-            });
+            }
+            jsonReader.endObject();
+            return webcam;
         }
     }
-
 
     private static final String TAG = "CityCam";
 }
