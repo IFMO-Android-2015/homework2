@@ -96,10 +96,11 @@ public class CityCamActivity extends AppCompatActivity {
         outState.putParcelable("img", camImg);
     }
 
-    public class DownloadTask extends AsyncTask<Void, Void, Cam> {
+    public static class DownloadTask extends AsyncTask<Void, Void, Cam> {
         // Текущий объект Activity, храним для обновления отображения
         private CityCamActivity activity;
         private Boolean successful;
+
 
         DownloadTask(CityCamActivity activity) {
             this.activity = activity;
@@ -119,7 +120,7 @@ public class CityCamActivity extends AppCompatActivity {
         protected Cam doInBackground(Void... ignore) {
             Cam result = null;
             try {
-                URL camURL = Webcams.createNearbyUrl(city.latitude, city.longitude);
+                URL camURL = Webcams.createNearbyUrl(activity.city.latitude, activity.city.longitude);
                 result = new CamParceUtils().readJSONStream(camURL);
                 Log.d(TAG, "Cam image URL: " + result.preview_url);
                 Log.d(TAG, "Parce successful");
@@ -129,10 +130,10 @@ public class CityCamActivity extends AppCompatActivity {
             Log.d(TAG, "Start downloading picture...");
             if (result != null) {
                 String urldisplay = result.preview_url;
-                camImg = null;
+                activity.camImg = null;
                 try {
                     InputStream in = new java.net.URL(urldisplay).openStream();
-                    camImg = BitmapFactory.decodeStream(in);
+                    activity.camImg = BitmapFactory.decodeStream(in);
                 } catch (Exception e) {
                     Log.e("Error", "Error downloading img");
                     e.printStackTrace();
@@ -147,15 +148,15 @@ public class CityCamActivity extends AppCompatActivity {
             if (activity != null) {
                 if (result != null) {
                     Log.d(TAG, "Successful parse cam");
-                    thisCam = result;
-                    textView.setText(thisCam.title);
-                    progressView.setVisibility(View.INVISIBLE);
-                    if (camImg != null) {
-                        camImageView.setImageBitmap(camImg);
+                    activity.thisCam = result;
+                    activity.textView.setText(activity.thisCam.title);
+                    activity.progressView.setVisibility(View.INVISIBLE);
+                    if (activity.camImg != null) {
+                        activity.camImageView.setImageBitmap(activity.camImg);
                     }
                 } else {
-                    progressView.setVisibility(View.INVISIBLE);
-                    textView.setText("Ошибка загрузки, попробуйте позже");
+                    activity.progressView.setVisibility(View.INVISIBLE);
+                    activity.textView.setText("Ошибка загрузки, попробуйте позже");
                 }
             } else {
                 Log.e(TAG, "Activity is null");
