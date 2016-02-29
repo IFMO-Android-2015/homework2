@@ -32,8 +32,8 @@ public class RecylcerDividersDecorator extends RecyclerView.ItemDecoration {
         // Резервируем под разделитель один пиксель в высоту под каждым элементом
         // кроме последнего
         int bottomInset = position >= 0 && position < itemCount - 1
-                        ? 1
-                        : 0;
+                ? 1
+                : 0;
         outRect.set(0, 0, 0, bottomInset);
     }
 
